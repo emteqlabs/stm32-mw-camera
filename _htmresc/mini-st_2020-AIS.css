@@ -39,13 +39,6 @@ html, * {
 * {
   font-size: 1rem; }
 
-body {
-  margin: 0;
-  color: var(--fore-color);
-  @background: var(--back-color);
-  background: var(--back-color) linear-gradient(#ffd200, #ffd200) repeat-y left top;
-  background-size: var(--background-margin);
-  }
 
 details {
   display: block; }
