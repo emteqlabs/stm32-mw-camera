@@ -327,7 +327,6 @@ int32_t OV02C_RegisterBusIO(OV02C_Object_t *pObj, OV02C_IO_t *pIO) {
 int32_t OV02C_Init(OV02C_Object_t *pObj, uint32_t Resolution,
 		uint32_t PixelFormat) {
 	int32_t ret = OV02C_OK;
-	uint8_t tmp;
 
 	if (pObj->IsInitialized == 0U) {
 		switch (Resolution) {
@@ -347,15 +346,7 @@ int32_t OV02C_Init(OV02C_Object_t *pObj, uint32_t Resolution,
 		}
 
 		if (!ret) {
-			/* Start streaming */
-			tmp = OV02C_MODE_STREAMING;
-			if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1)
-					!= OV02C_OK) {
-				ret = OV02C_ERROR;
-			} else {
-				OV02C_Delay(pObj, 20);
-				pObj->IsInitialized = 1U;
-			}
+			pObj->IsInitialized = 1U;
 		}
 	}
 
@@ -369,6 +360,20 @@ int32_t OV02C_DeInit(OV02C_Object_t *pObj) {
 	}
 
 	return OV02C_OK;
+}
+
+int32_t OV02C_Start(OV02C_Object_t *pObj) {
+	int ret;
+	uint8_t tmp;
+	/* Start streaming */
+	tmp = OV02C_MODE_STREAMING;
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1)
+			!= OV02C_OK) {
+		ret = OV02C_ERROR;
+	} else {
+		OV02C_Delay(pObj, 20);
+	}
+	return ret;
 }
 
 int32_t OV02C_ReadID(OV02C_Object_t *pObj, uint32_t *Id) {

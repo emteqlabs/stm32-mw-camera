@@ -100,6 +100,7 @@ typedef struct
 int32_t OV02C_RegisterBusIO(OV02C_Object_t *pObj, OV02C_IO_t *pIO);
 int32_t OV02C_Init(OV02C_Object_t *pObj, uint32_t Resolution, uint32_t PixelFormat);
 int32_t OV02C_DeInit(OV02C_Object_t *pObj);
+int32_t OV02C_Start(OV02C_Object_t *pObj);
 int32_t OV02C_ReadID(OV02C_Object_t *pObj, uint32_t *Id);
 int32_t OV02C_GetCapabilities(OV02C_Object_t *pObj, OV02C_Capabilities_t *Capabilities);
 int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain);

@@ -63,7 +63,7 @@ static int32_t CMW_OV02C_SetGain(void *io_ctx, int32_t gain)
 
 static int32_t CMW_OV02C_SetExposure(void *io_ctx, int32_t exposure)
 {
-  return IMX335_SetExposure(&((CMW_OV02C_t *)io_ctx)->ctx_driver, exposure);
+  return OV02C_SetExposure(&((CMW_OV02C_t *)io_ctx)->ctx_driver, exposure);
 }
 
 /**
@@ -117,8 +117,7 @@ static int32_t CMW_OV02C_SetFramerate(void *io_ctx, int32_t framerate)
 
 static int32_t CMW_OV02C_SetMirrorFlip(void *io_ctx, uint32_t config)
 {
-  int32_t mirrorFlip = CMW_OV02C_getMirrorFlipConfig(config);
-  return IMX335_MirrorFlipConfig(&((CMW_OV02C_t *)io_ctx)->ctx_driver, mirrorFlip);
+  return CMW_ERROR_FEATURE_NOT_SUPPORTED;
 }
 
 static int32_t CMW_OV02C_GetSensorInfo(void *io_ctx, ISP_SensorInfoTypeDef *info)
@@ -163,12 +162,6 @@ static int32_t CMW_OV02C_Init(void *io_ctx, CMW_Sensor_Init_t *initSensor)
   uint32_t resolution;
 
   ret = CMW_OV02C_GetResType(initSensor->width, initSensor->height, &resolution);
-  if (ret)
-  {
-    return CMW_ERROR_WRONG_PARAM;
-  }
-
-  ret = CMW_OV02C_SetMirrorFlip(io_ctx, initSensor->mirrorFlip);
   if (ret)
   {
     return CMW_ERROR_WRONG_PARAM;
