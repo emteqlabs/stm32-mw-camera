@@ -30,6 +30,7 @@ extern "C" {
 #define CAMERA_VD66GY_FREQ_IN_HZ       12000000U
 #define CAMERA_VD55G1_ADDRESS          0x20U
 #define CAMERA_VD55G1_FREQ_IN_HZ       12000000U
+#define CAMERA_OV02C_ADDRESS           0x6CU
 
 #if defined (STM32N657xx)
 
