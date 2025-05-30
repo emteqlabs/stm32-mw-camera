@@ -25,11 +25,11 @@
 #define OV02C_EXPOSURE_MIN_LINES         	4       // min lines
 #define OV02C_EXPOSURE_MAX_LINES_MARGIN  	15      // margin for max exposure
 #define OV02C_EXPOSURE_MAX_LINES  			2310    // max lines
-#define OV02C_EXPOSURE_MIN         			117		// in us, 4 lines, 29.1 us per line (hts / pclk is single line)
-#define OV02C_EXPOSURE_MAX					67221	// in us, 2310 lines, 29.1 us per line
-#define OV02C_ANALOG_GAIN_MIN		       	0x10    // analog gain register min (0x10 = 1x)
-#define OV02C_ANALOG_GAIN_MAX		       	0xF8    // analog gain register max (≈15.5x)
-#define OV02C_DIGITAL_GAIN_MIN		      	0x0400  // digital gain register min (0x0400 = 1x)
+#define OV02C_EXPOSURE_MIN         			57		// in us, 4 lines, 14.25 us per line (hts / pclk is single line)
+#define OV02C_EXPOSURE_MAX					32917	// in us, 2310 lines, 14.25 us per line
+#define OV02C_ANALOG_GAIN_MIN		       	0x10    // analog gain register min
+#define OV02C_ANALOG_GAIN_MAX		       	0xF8    // analog gain register max
+#define OV02C_DIGITAL_GAIN_MIN		      	0x0400  // digital gain register min
 #define OV02C_DIGITAL_GAIN_MAX		      	0x3FFF
 #define OV02C_GAIN_MIN						0			// TODO
 #define OV02C_GAIN_MAX						(48 * 1000)	// TODO

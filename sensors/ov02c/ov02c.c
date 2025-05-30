@@ -461,8 +461,8 @@ int32_t OV02C_GetSensorInfo(OV02C_Object_t *pObj, OV02C_SensorInfo_t *Info) {
 	Info->color_depth = OV02C_COLOR_DEPTH;
 	Info->width = OV02C_WIDTH;
 	Info->height = OV02C_HEIGHT;
-	Info->gain_min = OV02C_GAIN_MIN;
-	Info->gain_max = OV02C_GAIN_MAX;
+	Info->gain_min = OV02C_ANALOG_GAIN_MIN;
+	Info->gain_max = OV02C_ANALOG_GAIN_MAX;
 	Info->exposure_min = OV02C_EXPOSURE_MIN;
 	Info->exposure_max = OV02C_EXPOSURE_MAX;
 
@@ -471,53 +471,6 @@ int32_t OV02C_GetSensorInfo(OV02C_Object_t *pObj, OV02C_SensorInfo_t *Info) {
 int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain_dBm) {
 	int32_t ret = 0;
 	uint8_t tmp = 0;
-
-	// Compute desired total gain ratio from dBm (20 * log10 scale)
-	float gain_ratio = powf(10.0f, (float)gain_dBm / 2000.0f);
-	if (gain_ratio < 1.0f) gain_ratio = 1.0f;
-
-	// Sensor limits
-	const float analog_gain_max = 16.0f;
-	const float digital_gain_max = 16.0f;
-
-	// Prefer analog gain first, clamp to analog max
-	float analog_gain = (gain_ratio <= analog_gain_max) ? gain_ratio : analog_gain_max;
-	float digital_gain = gain_ratio / analog_gain;
-	if (digital_gain > digital_gain_max) digital_gain = digital_gain_max;
-
-	// -----------------------------------------
-	// Analog Gain Breakdown
-	// -----------------------------------------
-
-	// gain_coarse = 1x to 16x (7 bits)
-	uint8_t gain_coarse = (uint8_t)roundf((analog_gain - 1.0f) / 15.0f * 127.0f);
-	if (gain_coarse > 127) gain_coarse = 127;
-
-	// gain_fine = 1x to 2x (7 bits)
-	float fine_ratio = analog_gain / (1.0f + (15.0f / 127.0f) * gain_coarse);
-	if (fine_ratio > 2.0f) fine_ratio = 2.0f;
-	uint8_t gain_fine = (uint8_t)roundf((fine_ratio - 1.0f) * 127.0f);
-	if (gain_fine > 127) gain_fine = 127;
-
-	// Assemble analog gain registers
-	uint8_t analog_reg_0x3508 = gain_coarse & 0x7F;                  // bits [6:0]
-	uint8_t analog_reg_0x3509 = (gain_fine << 1) & 0xFE;             // bits [7:1]
-
-	// -----------------------------------------
-	// Digital Gain Breakdown
-	// -----------------------------------------
-
-	uint32_t digital_val = (uint32_t)roundf(digital_gain * 1024.0f);
-	if (digital_val < 0x0400) digital_val = 0x0400;
-	if (digital_val > 0x3FFF) digital_val = 0x3FFF;
-
-	uint8_t dig_gain_coarse = digital_val & 0x0F;                // bits [3:0] into reg 0x350A
-	uint8_t dig_gain_fine = (digital_val >> 4) & 0xFF;           // bits [11:4] into reg 0x350B
-	uint8_t dig_gain_fine_extra = (digital_val >> 12) & 0x03;    // bits [13:12] into bits [7:6] of reg 0x350C
-
-	uint8_t reg_0x350A = dig_gain_coarse;
-	uint8_t reg_0x350B = dig_gain_fine;
-	uint8_t reg_0x350C = dig_gain_fine_extra << 6;
 
 	// -----------------------------------------
 	// Disable streaming to apply gain updates
@@ -532,9 +485,8 @@ int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain_dBm) {
 	// -----------------------------------------
 	// Write analog gain
 	// -----------------------------------------
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN,     &analog_reg_0x3508, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN + 1, &analog_reg_0x3509, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-
+	tmp = (uint8_t)gain_dBm;
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN,     &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
 	// -----------------------------------------
 	// Write digital gain
 	// -----------------------------------------
