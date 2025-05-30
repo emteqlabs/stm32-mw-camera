@@ -112,7 +112,7 @@ int32_t OV02C_GetSensorInfo(OV02C_Object_t *pObj, OV02C_SensorInfo_t *Info);
 int32_t OV02C_SetTestPattern(OV02C_Object_t *pObj, int32_t mode);
 
 // resolutions
-#define OV02C_RESOLUTION_1920_1080	1
+#define OV02C_RESOLUTION_1928_1082	1
 
 // formats
 #define OV02C_RAW_GRBG10 1

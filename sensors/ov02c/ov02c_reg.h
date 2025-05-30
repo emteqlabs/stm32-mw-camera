@@ -31,6 +31,8 @@
 #define OV02C_ANALOG_GAIN_MAX		       	0xF8    // analog gain register max (≈15.5x)
 #define OV02C_DIGITAL_GAIN_MIN		      	0x0400  // digital gain register min (0x0400 = 1x)
 #define OV02C_DIGITAL_GAIN_MAX		      	0x3FFF
+#define OV02C_GAIN_MIN						0			// TODO
+#define OV02C_GAIN_MAX						(48 * 1000)	// TODO
 
 #define OV02C_REG_HTS_MSB			0x380C
 #define OV02C_REG_HTS_LSB			0x380D
@@ -38,11 +40,11 @@
 #define OV02C_REG_VTS_MSB			0x380E
 #define OV02C_REG_VTS_LSB			0x380F
 
-#define OV02C_BAYER_PATTERN      	0x03 /* From ISP definition BGGR / TODO comnon enumeration in camera */
+#define OV02C_BAYER_PATTERN      	0x01 /* From ISP definition BGGR / TODO comnon enumeration in camera */
 #define OV02C_COLOR_DEPTH        	10 /* in bits */
 
-#define OV02C_WIDTH              	1920
-#define OV02C_HEIGHT             	1080
+#define OV02C_WIDTH              	1928
+#define OV02C_HEIGHT             	1082
 
 typedef int32_t (*OV02C_Write_Func)(void *, uint16_t, uint8_t*, uint16_t);
 typedef int32_t (*OV02C_Read_Func) (void *, uint16_t, uint8_t*, uint16_t);

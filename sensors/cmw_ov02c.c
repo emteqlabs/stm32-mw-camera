@@ -16,9 +16,9 @@
 
 static int CMW_OV02C_GetResType(uint32_t width, uint32_t height, uint32_t*res)
 {
-  if (width == 1920 && height == 1080)
+  if (width == OV02C_WIDTH && height == OV02C_HEIGHT)
   {
-    *res = OV02C_RESOLUTION_1920_1080;
+    *res = OV02C_RESOLUTION_1928_1082;
   }
   else
   {
@@ -142,8 +142,8 @@ static int32_t CMW_OV02C_GetSensorInfo(void *io_ctx, ISP_SensorInfoTypeDef *info
   info->height = OV02C_HEIGHT;
 
   // TODO GAIN
-  info->gain_min = OV02C_ANALOG_GAIN_MIN;
-  info->gain_max = OV02C_ANALOG_GAIN_MAX;
+  info->gain_min = OV02C_GAIN_MIN;
+  info->gain_max = OV02C_GAIN_MAX;
 
   info->exposure_min = OV02C_EXPOSURE_MIN;
   info->exposure_max = OV02C_EXPOSURE_MAX;
