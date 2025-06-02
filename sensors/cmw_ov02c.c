@@ -141,9 +141,8 @@ static int32_t CMW_OV02C_GetSensorInfo(void *io_ctx, ISP_SensorInfoTypeDef *info
   info->width = OV02C_WIDTH;
   info->height = OV02C_HEIGHT;
 
-  // TODO GAIN
-  info->gain_min = OV02C_ANALOG_GAIN_MIN;
-  info->gain_max = OV02C_ANALOG_GAIN_MAX;
+  info->gain_min = OV02C_GAIN_MIN;
+  info->gain_max = OV02C_GAIN_MAX;
 
   info->exposure_min = OV02C_EXPOSURE_MIN;
   info->exposure_max = OV02C_EXPOSURE_MAX;

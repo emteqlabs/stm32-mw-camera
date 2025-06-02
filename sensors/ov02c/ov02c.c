@@ -267,6 +267,26 @@ static int32_t OV02C_WriteRegWrap(void *handle, uint16_t Reg, uint8_t *Data,
 		uint16_t Length);
 static int32_t OV02C_Delay(OV02C_Object_t *pObj, uint32_t Delay);
 
+static int32_t OV02C_SetAnalogGain(OV02C_Object_t *pObj, float gain_dBm);
+static int32_t OV02C_SetDigitalGain(OV02C_Object_t *pObj, float gain_dBm);
+
+static uint32_t map_range_to_uint32(
+    float value,
+    float in_min,
+    float in_max,
+    uint32_t out_min,
+    uint32_t out_max
+) {
+    if (value < in_min) value = in_min;
+    if (value > in_max) value = in_max;
+
+    float normalized = (value - in_min) / (in_max - in_min);
+
+    float mapped = out_min + normalized * (float)(out_max - out_min);
+
+    return (uint32_t)roundf(mapped);
+}
+
 static int32_t OV02C_WriteTable(OV02C_Object_t *pObj, const struct regval *regs,
 		uint32_t size) {
 	uint32_t index;
@@ -461,19 +481,75 @@ int32_t OV02C_GetSensorInfo(OV02C_Object_t *pObj, OV02C_SensorInfo_t *Info) {
 	Info->color_depth = OV02C_COLOR_DEPTH;
 	Info->width = OV02C_WIDTH;
 	Info->height = OV02C_HEIGHT;
-	Info->gain_min = OV02C_ANALOG_GAIN_MIN;
-	Info->gain_max = OV02C_ANALOG_GAIN_MAX;
+	Info->gain_min = OV02C_GAIN_MIN;
+	Info->gain_max = OV02C_GAIN_MAX;
 	Info->exposure_min = OV02C_EXPOSURE_MIN;
 	Info->exposure_max = OV02C_EXPOSURE_MAX;
 
 	return OV02C_OK;
 }
+
+static int32_t OV02C_SetAnalogGain(OV02C_Object_t *pObj, float gain_dBm) {
+	int ret = OV02C_OK;
+	uint8_t tmp = 0;
+	if(gain_dBm < 0) {
+		gain_dBm = 0;
+	} else if (gain_dBm > OV02C_ANALOG_GAIN_MAX_DBM) {
+		gain_dBm = OV02C_ANALOG_GAIN_MAX_DBM;
+	}
+	// convert dBm to linear gain
+	float linear_gain = MDECIBEL_TO_LINEAR(gain_dBm);
+	if(linear_gain > OV02C_ANALOG_GAIN_MAX_LINEAR) {
+		linear_gain = OV02C_ANALOG_GAIN_MAX_LINEAR;
+	}
+	// convert linear gain to register value
+	uint16_t regs_value = (uint16_t)map_range_to_uint32(linear_gain, 1.0f, OV02C_ANALOG_GAIN_MAX_LINEAR, OV02C_ANALOG_GAIN_MIN_REG, OV02C_ANALOG_GAIN_MAX_REG);
+	tmp = (regs_value >> 8);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN,     &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
+	tmp = (regs_value & 0xFF);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN + 1, &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
+exit_gain:
+	return ret;
+}
+
+static int32_t OV02C_SetDigitalGain(OV02C_Object_t *pObj, float gain_dBm)
+{
+	int ret = OV02C_OK;
+	uint8_t tmp = 0;
+	if(gain_dBm < 0) {
+		gain_dBm = 0;
+	} else if (gain_dBm > OV02C_DIGITAL_GAIN_MAX_DBM) {
+		gain_dBm = OV02C_DIGITAL_GAIN_MAX_DBM;
+	}
+	// convert dBm to linear gain
+	float linear_gain = MDECIBEL_TO_LINEAR(gain_dBm);
+	if(linear_gain > OV02C_DIGITAL_GAIN_MAX_LINEAR) {
+		linear_gain = OV02C_DIGITAL_GAIN_MAX_LINEAR;
+	}
+	// convert linear gain to register value
+	uint32_t regs_value = map_range_to_uint32(linear_gain, 1.0f, OV02C_DIGITAL_GAIN_MAX_LINEAR, OV02C_DIGITAL_GAIN_MIN_REG, OV02C_DIGITAL_GAIN_MAX_REG);
+	tmp = (regs_value >> 16);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN,     &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
+	tmp = (regs_value >> 8) & 0xFF;
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN + 1, &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
+	tmp = (regs_value & 0xFF);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN + 2, &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
+exit_gain:
+	return ret;
+}
+
 int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain_dBm) {
 	int32_t ret = 0;
 	uint8_t tmp = 0;
 
+	if(gain_dBm < OV02C_GAIN_MIN) {
+		gain_dBm = OV02C_GAIN_MIN;
+	} else if (gain_dBm > OV02C_GAIN_MAX) {
+		gain_dBm = OV02C_GAIN_MAX;
+	}
+
 	// -----------------------------------------
-	// Disable streaming to apply gain updates
+	// Disable streaming to apply gain updates (TODO: use hold function)
 	// -----------------------------------------
 	tmp = OV02C_MODE_STANDBY;
 	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1) != OV02C_OK) {
@@ -482,17 +558,10 @@ int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain_dBm) {
 	}
 	OV02C_Delay(pObj, 20);
 
-	// -----------------------------------------
-	// Write analog gain
-	// -----------------------------------------
-	tmp = (uint8_t)gain_dBm;
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN,     &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-	// -----------------------------------------
-	// Write digital gain
-	// -----------------------------------------
-//	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN,     &reg_0x350A, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-//	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN + 1, &reg_0x350B, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-//	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN + 2, &reg_0x350C, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
+	float analog_gain_dBm = (gain_dBm > OV02C_ANALOG_GAIN_MAX_DBM) ? OV02C_ANALOG_GAIN_MAX_DBM : gain_dBm;
+	float digital_gain_dBm = gain_dBm - analog_gain_dBm;
+	if(OV02C_SetAnalogGain(pObj, analog_gain_dBm) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
+	if(OV02C_SetDigitalGain(pObj, digital_gain_dBm) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
 
 exit_gain:
 	// Re-enable streaming
