@@ -540,7 +540,6 @@ exit_gain:
 
 int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain_dBm) {
 	int32_t ret = 0;
-	uint8_t tmp = 0;
 
 	if(gain_dBm < OV02C_GAIN_MIN) {
 		gain_dBm = OV02C_GAIN_MIN;
@@ -548,29 +547,12 @@ int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain_dBm) {
 		gain_dBm = OV02C_GAIN_MAX;
 	}
 
-	// -----------------------------------------
-	// Disable streaming to apply gain updates (TODO: use hold function)
-	// -----------------------------------------
-	tmp = OV02C_MODE_STANDBY;
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1) != OV02C_OK) {
-		ret = OV02C_ERROR;
-		goto exit_gain;
-	}
-	OV02C_Delay(pObj, 20);
-
 	float analog_gain_dBm = (gain_dBm > OV02C_ANALOG_GAIN_MAX_DBM) ? OV02C_ANALOG_GAIN_MAX_DBM : gain_dBm;
 	float digital_gain_dBm = gain_dBm - analog_gain_dBm;
 	if(OV02C_SetAnalogGain(pObj, analog_gain_dBm) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
 	if(OV02C_SetDigitalGain(pObj, digital_gain_dBm) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
 
 exit_gain:
-	// Re-enable streaming
-	tmp = OV02C_MODE_STREAMING;
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1) != OV02C_OK) {
-		ret = OV02C_ERROR;
-	} else {
-		OV02C_Delay(pObj, 20);
-	}
 	return ret;
 }
 
@@ -589,21 +571,12 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us)
     /* Calculate number of lines (rounded) */
     uint32_t line_us = (hts * 1000000) / pixel_clock;
     uint32_t lines = exposure_us / line_us;
-//    uint32_t lines = (uint32_t)((exposure_us * pixel_clock + 500000ULL) / (hts * 1000000ULL));
 
     /* Clamp to sensor limits */
     if (lines < OV02C_EXPOSURE_MIN_LINES) lines = OV02C_EXPOSURE_MIN_LINES;
     if (lines > vts - OV02C_EXPOSURE_MAX_LINES_MARGIN) lines = vts - OV02C_EXPOSURE_MAX_LINES_MARGIN; /* 16-bit register limit */
 
-    /* Disable streaming (TODO: maybe it is better to enable HOLD function) */
-    tmp = OV02C_MODE_STANDBY;
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1)
-			!= OV02C_OK) {
-		ret = OV02C_ERROR;
-		goto exit_exp;
-	} else {
-		OV02C_Delay(pObj, 20);
-	}
+    // TODO maybe add hold functionality
 
     /* Write exposure lines (16-bit: 0x3501 = MSB, 0x3502 = LSB) */
     {
@@ -615,14 +588,7 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us)
     }
 
 exit_exp:
-    /* Re-enable streaming (TODO: maybe it is better to enable HOLD function) */
-	tmp = OV02C_MODE_STREAMING;
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1)
-			!= OV02C_OK) {
-		ret = OV02C_ERROR;
-	} else {
-		OV02C_Delay(pObj, 20);
-	}
+    // TODO: maybe add hold functionality if possible
     return ret;
 }
 
