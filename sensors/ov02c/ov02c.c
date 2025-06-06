@@ -2,6 +2,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <stdio.h>
+
 #define SWAP_ENDIAN16(x) ( ((x) >> 8) | ((x) << 8) )
 
 #define SWAP_ENDIAN32(x) 										\
@@ -278,6 +280,8 @@ static int32_t OV02C_Delay(OV02C_Object_t *pObj, uint32_t Delay);
 static int32_t OV02C_SetAnalogGain(OV02C_Object_t *pObj, float gain_dBm);
 static int32_t OV02C_SetDigitalGain(OV02C_Object_t *pObj, float gain_dBm);
 
+static int32_t OV02C_GetPCLK(OV02C_Object_t *pObj,  uint64_t* pclk);
+
 static uint32_t map_range_to_uint32(float value, float in_min, float in_max,
 		uint32_t out_min, uint32_t out_max) {
 	if (value < in_min)
@@ -382,6 +386,9 @@ int32_t OV02C_Init(OV02C_Object_t *pObj, uint32_t Resolution,
 			pObj->IsInitialized = 1U;
 		}
 	}
+
+	// get PCLK for exposure control
+	ret = OV02C_GetPCLK(pObj, &pObj->Pclk);
 
 	return ret;
 }
@@ -566,6 +573,122 @@ int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain_dBm) {
 	exit_gain: return ret;
 }
 
+static int32_t OV02C_GetPCLK(OV02C_Object_t *pObj, uint64_t *pclk) {
+	int32_t ret;
+	float PLL2_PreDiv0, PLL2_PreDiv = 1.0f;
+	uint16_t PLL2_DivLoop;
+	float PLL2_DivSys = 1.0f;
+	uint8_t PLL2_DivSysPre, PLL2_Sa1Div, PLL2_DivDac, PLL2_SRAMDiv;
+	float PLL2_VCO, PLL2_SCLK, PLL2_DACCLK, PLL2_SRAMCLK, PLL2_SA1CLK;
+	static const uint8_t mclk = 24;  // MHz
+
+	// Required registers
+	uint8_t R314, R315, R316, R317, R318, R31a, R31c, R31d, R321;
+
+	// Read registers
+	ret = ov02c_read_reg(&pObj->Ctx, 0x0314, &R314, 1);
+	if (ret != 0)
+		goto exit_pclk;
+	ret = ov02c_read_reg(&pObj->Ctx, 0x0315, &R315, 1);
+	if (ret != 0)
+		goto exit_pclk;
+	ret = ov02c_read_reg(&pObj->Ctx, 0x0316, &R316, 1);
+	if (ret != 0)
+		goto exit_pclk;
+	ret = ov02c_read_reg(&pObj->Ctx, 0x0317, &R317, 1);
+	if (ret != 0)
+		goto exit_pclk;
+	ret = ov02c_read_reg(&pObj->Ctx, 0x0318, &R318, 1);
+	if (ret != 0)
+		goto exit_pclk;
+	ret = ov02c_read_reg(&pObj->Ctx, 0x031a, &R31a, 1);
+	if (ret != 0)
+		goto exit_pclk;
+	ret = ov02c_read_reg(&pObj->Ctx, 0x031c, &R31c, 1);
+	if (ret != 0)
+		goto exit_pclk;
+	ret = ov02c_read_reg(&pObj->Ctx, 0x031d, &R31d, 1);
+	if (ret != 0)
+		goto exit_pclk;
+	ret = ov02c_read_reg(&pObj->Ctx, 0x0321, &R321, 1);
+	if (ret != 0)
+		goto exit_pclk;
+
+	PLL2_PreDiv0 = (float) ((R31a & 0x1) + 1);
+	switch (R314 & 0x7) {
+	case 0:
+		PLL2_PreDiv = 1.0f;
+		break;
+	case 1:
+		PLL2_PreDiv = 1.5f;
+		break;
+	case 2:
+		PLL2_PreDiv = 2.0f;
+		break;
+	case 3:
+		PLL2_PreDiv = 2.5f;
+		break;
+	case 4:
+		PLL2_PreDiv = 3.0f;
+		break;
+	case 5:
+		PLL2_PreDiv = 4.0f;
+		break;
+	case 6:
+		PLL2_PreDiv = 6.0f;
+		break;
+	case 7:
+		PLL2_PreDiv = 8.0f;
+		break;
+	}
+
+	PLL2_DivLoop = ((R315 & 0x3) << 8) | R316;
+
+	switch (R317 & 0xf) {
+	case 0:
+		PLL2_DivSys = 1.0f;
+		break;
+	case 1:
+		PLL2_DivSys = 1.5f;
+		break;
+	case 2:
+		PLL2_DivSys = 2.0f;
+		break;
+	case 3:
+		PLL2_DivSys = 2.5f;
+		break;
+	case 4:
+		PLL2_DivSys = 3.0f;
+		break;
+	case 5:
+		PLL2_DivSys = 3.5f;
+		break;
+	case 6:
+		PLL2_DivSys = 4.0f;
+		break;
+	case 7:
+		PLL2_DivSys = 5.0f;
+		break;
+	}
+
+	PLL2_DivSysPre = (R318 & 0xf) + 1;
+	PLL2_Sa1Div = (R31c & 0xf) + 1;
+	PLL2_DivDac = (R31d & 0x1f) + 1;
+	PLL2_SRAMDiv = (R321 & 0x7) + 1;
+
+	PLL2_VCO = mclk / PLL2_PreDiv0 / PLL2_PreDiv * PLL2_DivLoop;
+	PLL2_SCLK = PLL2_VCO / PLL2_DivSys / PLL2_DivSysPre;
+	PLL2_DACCLK = PLL2_VCO / PLL2_DivDac;
+	PLL2_SRAMCLK = PLL2_VCO / PLL2_SRAMDiv;
+	PLL2_SA1CLK = PLL2_VCO / PLL2_Sa1Div;
+
+	// Output SA1 clock as PCLK, in Hz
+	*pclk = ((uint64_t) PLL2_SA1CLK * 1000000);
+	ret = OV02C_OK;
+
+	exit_pclk: return ret;
+}
+
 int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 	int32_t ret = 0;
 
@@ -573,9 +696,8 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 	// line time (t_line) = Horizontal Total Size (HTS) / Pixel Clock (PCLK)
 	// Vertical Total Size (VTS) = Exposure (t_exposure) / t_line = Exposure / (HTS / PCLK)
 	// PCLK = FPS * HTS * VTS
-	uint64_t pixel_clock = 80000000ULL;
-
 	uint16_t hts = 0, vts = 0;
+
 	// read HTS and VTS
 	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS, (uint8_t*) &hts,
 			2) != OV02C_OK) {
@@ -590,7 +712,7 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 	}
 	vts = SWAP_ENDIAN16(vts);
 	/* Calculate number of lines (rounded) */
-	uint32_t line_us = (hts * 1000000) / pixel_clock;
+	uint32_t line_us = (hts * 1000000) / pObj->Pclk;
 	uint32_t lines = exposure_us / line_us;
 
 	/* Clamp to sensor limits */

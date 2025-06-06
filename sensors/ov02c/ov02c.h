@@ -28,7 +28,8 @@ typedef struct
 {
   OV02C_IO_t         IO;
   ov02c_ctx_t        Ctx;
-  uint8_t             IsInitialized;
+  uint8_t            IsInitialized;
+  uint64_t 			 Pclk;
 } OV02C_Object_t;
 
 typedef struct
@@ -126,7 +127,6 @@ int32_t OV02C_SetFrequency(OV02C_Object_t *pObj, int32_t frequency);
 int32_t OV02C_SetFramerate(OV02C_Object_t *pObj, int32_t framerate);
 int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config);
 int32_t OV02C_GetSensorInfo(OV02C_Object_t *pObj, OV02C_SensorInfo_t *Info);
-int32_t OV02C_SetTestPattern(OV02C_Object_t *pObj, int32_t mode);
 
 #ifdef __cplusplus
 }

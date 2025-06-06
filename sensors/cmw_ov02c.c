@@ -166,11 +166,6 @@ static int32_t CMW_OV02C_GetSensorInfo(void *io_ctx, ISP_SensorInfoTypeDef *info
   return CMW_ERROR_NONE;
 }
 
-static int32_t CMW_OV02C_SetTestPattern(void *io_ctx, int32_t mode)
-{
-  return OV02C_SetTestPattern(&((CMW_OV02C_t *)io_ctx)->ctx_driver, mode);
-}
-
 static int32_t CMW_OV02C_Init(void *io_ctx, CMW_Sensor_Init_t *initSensor)
 {
   int ret = CMW_ERROR_NONE;
@@ -309,7 +304,6 @@ int CMW_OV02C_Probe(CMW_OV02C_t *io_ctx, CMW_Sensor_if_t *ov02c_if)
   ov02c_if->SetFramerate = CMW_OV02C_SetFramerate;
   ov02c_if->SetMirrorFlip = CMW_OV02C_SetMirrorFlip;
   ov02c_if->GetSensorInfo = CMW_OV02C_GetSensorInfo;
-  ov02c_if->SetTestPattern = CMW_OV02C_SetTestPattern;
   return ret;
 }
 
