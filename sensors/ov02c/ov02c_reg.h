@@ -39,8 +39,10 @@
 #define OV02C_GAIN_MIN						0      // dBm
 #define OV02C_GAIN_MAX						47610  // dBm
 
+#define OV02C_REG_HTS				0x380C
 #define OV02C_REG_HTS_MSB			0x380C
 #define OV02C_REG_HTS_LSB			0x380D
+#define OV02C_REG_VTS 				0x380E
 #define OV02C_REG_VTS_MSB			0x380E
 #define OV02C_REG_VTS_LSB			0x380F
 

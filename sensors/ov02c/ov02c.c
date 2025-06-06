@@ -2,16 +2,31 @@
 #include <string.h>
 #include <math.h>
 
+#define SWAP_ENDIAN16(x) ( ((x) >> 8) | ((x) << 8) )
+
+#define SWAP_ENDIAN32(x) 										\
+						(										\
+								(((x) & 0x000000FF) << 24) | 	\
+								(((x) & 0x0000FF00) <<  8) | 	\
+								(((x) & 0x00FF0000) >>  8) | 	\
+								(((x) & 0xFF000000) >> 24)		\
+						)
+
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define MDECIBEL_TO_LINEAR(mdB)             (powf(10.0f, (mdB / 1000.0f) / 20.0f))
 #define LINEAR_TO_MDECIBEL(linearValue)     (1000 * (20.0f * log10f(linearValue)))
 
-OV02C_CAMERA_Drv_t OV02C_CAMERA_Driver = { .Init = OV02C_Init, .DeInit =
-		OV02C_DeInit, .ReadID = OV02C_ReadID, .GetCapabilities =
-		OV02C_GetCapabilities, .SetGain = OV02C_SetGain, .SetExposure =
-		OV02C_SetExposure, .SetFrequency = OV02C_SetFrequency,
-		.MirrorFlipConfig = OV02C_MirrorFlipConfig, .GetSensorInfo =
-				OV02C_GetSensorInfo, .SetTestPattern = OV02C_SetTestPattern };
+OV02C_CAMERA_Drv_t OV02C_CAMERA_Driver = {
+		.Init = OV02C_Init,
+		.DeInit = OV02C_DeInit,
+		.ReadID = OV02C_ReadID,
+		.GetCapabilities = OV02C_GetCapabilities,
+		.SetGain = OV02C_SetGain,
+		.SetExposure = OV02C_SetExposure,
+		.SetFrequency = OV02C_SetFrequency,
+		.MirrorFlipConfig = OV02C_MirrorFlipConfig,
+		.GetSensorInfo = OV02C_GetSensorInfo,
+};
 
 struct regval {
 	uint16_t addr;
@@ -252,10 +267,6 @@ static const struct regval ov02c10_input_24M_MIPI_2lane_raw10_1928x1082_30fps[] 
 	{0x3016, 0x32},
 };
 
-//static const struct regval test_pattern_enable_regs[] = { };
-//
-//static const struct regval test_pattern_disable_regs[] = { };
-
 static int32_t OV02C_WriteTable(OV02C_Object_t *pObj, const struct regval *regs,
 		uint32_t size);
 static int32_t OV02C_ReadRegWrap(void *handle, uint16_t Reg, uint8_t *Data,
@@ -267,21 +278,18 @@ static int32_t OV02C_Delay(OV02C_Object_t *pObj, uint32_t Delay);
 static int32_t OV02C_SetAnalogGain(OV02C_Object_t *pObj, float gain_dBm);
 static int32_t OV02C_SetDigitalGain(OV02C_Object_t *pObj, float gain_dBm);
 
-static uint32_t map_range_to_uint32(
-    float value,
-    float in_min,
-    float in_max,
-    uint32_t out_min,
-    uint32_t out_max
-) {
-    if (value < in_min) value = in_min;
-    if (value > in_max) value = in_max;
+static uint32_t map_range_to_uint32(float value, float in_min, float in_max,
+		uint32_t out_min, uint32_t out_max) {
+	if (value < in_min)
+		value = in_min;
+	if (value > in_max)
+		value = in_max;
 
-    float normalized = (value - in_min) / (in_max - in_min);
+	float normalized = (value - in_min) / (in_max - in_min);
 
-    float mapped = out_min + normalized * (float)(out_max - out_min);
+	float mapped = out_min + normalized * (float) (out_max - out_min);
 
-    return (uint32_t)roundf(mapped);
+	return (uint32_t) roundf(mapped);
 }
 
 static int32_t OV02C_WriteTable(OV02C_Object_t *pObj, const struct regval *regs,
@@ -360,8 +368,7 @@ int32_t OV02C_Init(OV02C_Object_t *pObj, uint32_t Resolution,
 			if (OV02C_WriteTable(pObj,
 					ov02c10_input_24M_MIPI_2lane_raw10_1928x1082_30fps,
 					ARRAY_SIZE(
-							ov02c10_input_24M_MIPI_2lane_raw10_1928x1082_30fps))
-					!= OV02C_OK) {
+							ov02c10_input_24M_MIPI_2lane_raw10_1928x1082_30fps)) != OV02C_OK) {
 				ret = OV02C_ERROR;
 			}
 			break;
@@ -393,8 +400,7 @@ int32_t OV02C_Start(OV02C_Object_t *pObj) {
 	uint8_t tmp;
 	/* Start streaming */
 	tmp = OV02C_MODE_STREAMING;
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1)
-			!= OV02C_OK) {
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_MODE_SELECT, &tmp, 1) != OV02C_OK) {
 		ret = OV02C_ERROR;
 	} else {
 		OV02C_Delay(pObj, 20);
@@ -409,16 +415,15 @@ int32_t OV02C_ReadID(OV02C_Object_t *pObj, uint32_t *Id) {
 	/* Initialize I2C */
 	pObj->IO.Init();
 
-	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_ID_BYTE_2, &tmp[2], 1)
-			!= OV02C_OK) {
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_ID_BYTE_2, &tmp[2], 1) != OV02C_OK) {
 		ret = OV02C_ERROR;
 	} else {
-		if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_ID_BYTE_1, &tmp[1], 1)
-				!= OV02C_OK) {
+		if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_ID_BYTE_1, &tmp[1],
+				1) != OV02C_OK) {
 			ret = OV02C_ERROR;
 		} else {
-			if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_ID_BYTE_0, &tmp[0], 1)
-					!= OV02C_OK) {
+			if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_ID_BYTE_0, &tmp[0],
+					1) != OV02C_OK) {
 				ret = OV02C_ERROR;
 			} else {
 				ret = OV02C_OK;
@@ -455,7 +460,7 @@ int32_t OV02C_GetCapabilities(OV02C_Object_t *pObj,
 		Capabilities->Config_SpecialEffect = 0;
 		Capabilities->Config_Zoom = 0;
 		Capabilities->Config_SensorInfo = 1;
-		Capabilities->Config_TestPattern = 1;
+		Capabilities->Config_TestPattern = 0;
 
 		ret = OV02C_OK;
 	}
@@ -488,130 +493,124 @@ int32_t OV02C_GetSensorInfo(OV02C_Object_t *pObj, OV02C_SensorInfo_t *Info) {
 
 static int32_t OV02C_SetAnalogGain(OV02C_Object_t *pObj, float gain_dBm) {
 	int ret = OV02C_OK;
-	uint8_t tmp = 0;
-	if(gain_dBm < 0) {
+	if (gain_dBm < 0) {
 		gain_dBm = 0;
 	} else if (gain_dBm > OV02C_ANALOG_GAIN_MAX_DBM) {
 		gain_dBm = OV02C_ANALOG_GAIN_MAX_DBM;
 	}
 	// convert dBm to linear gain
 	float linear_gain = MDECIBEL_TO_LINEAR(gain_dBm);
-	if(linear_gain > OV02C_ANALOG_GAIN_MAX_LINEAR) {
+	if (linear_gain > OV02C_ANALOG_GAIN_MAX_LINEAR) {
 		linear_gain = OV02C_ANALOG_GAIN_MAX_LINEAR;
 	}
 	// convert linear gain to register value
-	uint16_t regs_value = (uint16_t)map_range_to_uint32(linear_gain, 1.0f, OV02C_ANALOG_GAIN_MAX_LINEAR, OV02C_ANALOG_GAIN_MIN_REG, OV02C_ANALOG_GAIN_MAX_REG);
-	tmp = (regs_value >> 8);
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN,     &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-	tmp = (regs_value & 0xFF);
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN + 1, &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-exit_gain:
-	return ret;
+	uint16_t reg_value = (uint16_t) map_range_to_uint32(linear_gain, 1.0f,
+			OV02C_ANALOG_GAIN_MAX_LINEAR, OV02C_ANALOG_GAIN_MIN_REG,
+			OV02C_ANALOG_GAIN_MAX_REG);
+	reg_value = SWAP_ENDIAN16(reg_value);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_ANALOG_GAIN,
+			(uint8_t*) &reg_value, 1) != OV02C_OK) {
+		ret = OV02C_ERROR;
+		goto exit_gain;
+	}
+	exit_gain: return ret;
 }
 
-static int32_t OV02C_SetDigitalGain(OV02C_Object_t *pObj, float gain_dBm)
-{
+static int32_t OV02C_SetDigitalGain(OV02C_Object_t *pObj, float gain_dBm) {
 	int ret = OV02C_OK;
-	uint8_t tmp = 0;
-	if(gain_dBm < 0) {
+	if (gain_dBm < 0) {
 		gain_dBm = 0;
 	} else if (gain_dBm > OV02C_DIGITAL_GAIN_MAX_DBM) {
 		gain_dBm = OV02C_DIGITAL_GAIN_MAX_DBM;
 	}
 	// convert dBm to linear gain
 	float linear_gain = MDECIBEL_TO_LINEAR(gain_dBm);
-	if(linear_gain > OV02C_DIGITAL_GAIN_MAX_LINEAR) {
+	if (linear_gain > OV02C_DIGITAL_GAIN_MAX_LINEAR) {
 		linear_gain = OV02C_DIGITAL_GAIN_MAX_LINEAR;
 	}
 	// convert linear gain to register value
-	uint32_t regs_value = map_range_to_uint32(linear_gain, 1.0f, OV02C_DIGITAL_GAIN_MAX_LINEAR, OV02C_DIGITAL_GAIN_MIN_REG, OV02C_DIGITAL_GAIN_MAX_REG);
-	tmp = (regs_value >> 16);
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN,     &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-	tmp = (regs_value >> 8) & 0xFF;
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN + 1, &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-	tmp = (regs_value & 0xFF);
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN + 2, &tmp, 1) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-exit_gain:
-	return ret;
+	uint32_t reg_value = map_range_to_uint32(linear_gain, 1.0f,
+			OV02C_DIGITAL_GAIN_MAX_LINEAR, OV02C_DIGITAL_GAIN_MIN_REG,
+			OV02C_DIGITAL_GAIN_MAX_REG);
+	reg_value = SWAP_ENDIAN32(reg_value);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_DIGITAL_GAIN,
+			((uint8_t*) &reg_value) + 1, 3) != OV02C_OK) {
+		ret = OV02C_ERROR;
+		goto exit_gain;
+	}
+	exit_gain: return ret;
 }
 
 int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain_dBm) {
 	int32_t ret = 0;
 
-	if(gain_dBm < OV02C_GAIN_MIN) {
+	if (gain_dBm < OV02C_GAIN_MIN) {
 		gain_dBm = OV02C_GAIN_MIN;
 	} else if (gain_dBm > OV02C_GAIN_MAX) {
 		gain_dBm = OV02C_GAIN_MAX;
 	}
 
-	float analog_gain_dBm = (gain_dBm > OV02C_ANALOG_GAIN_MAX_DBM) ? OV02C_ANALOG_GAIN_MAX_DBM : gain_dBm;
+	float analog_gain_dBm =
+			(gain_dBm > OV02C_ANALOG_GAIN_MAX_DBM) ?
+					OV02C_ANALOG_GAIN_MAX_DBM : gain_dBm;
 	float digital_gain_dBm = gain_dBm - analog_gain_dBm;
-	if(OV02C_SetAnalogGain(pObj, analog_gain_dBm) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
-	if(OV02C_SetDigitalGain(pObj, digital_gain_dBm) != OV02C_OK) { ret = OV02C_ERROR; goto exit_gain; }
+	if (OV02C_SetAnalogGain(pObj, analog_gain_dBm) != OV02C_OK) {
+		ret = OV02C_ERROR;
+		goto exit_gain;
+	}
+	if (OV02C_SetDigitalGain(pObj, digital_gain_dBm) != OV02C_OK) {
+		ret = OV02C_ERROR;
+		goto exit_gain;
+	}
 
-exit_gain:
-	return ret;
+	exit_gain: return ret;
 }
 
-int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us)
-{
-    int32_t ret = 0;
-    uint8_t tmp = 0;
+int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
+	int32_t ret = 0;
 
-    // Exposure calculations
-    // line time (t_line) = Horizontal Total Size (HTS) / Pixel Clock (PCLK)
-    // Vertical Total Size (VTS) = Exposure (t_exposure) / t_line = Exposure / (HTS / PCLK)
-    // PCLK = FPS * HTS * VTS
-    uint64_t pixel_clock = 80000000ULL;
+	// Exposure calculations
+	// line time (t_line) = Horizontal Total Size (HTS) / Pixel Clock (PCLK)
+	// Vertical Total Size (VTS) = Exposure (t_exposure) / t_line = Exposure / (HTS / PCLK)
+	// PCLK = FPS * HTS * VTS
+	uint64_t pixel_clock = 80000000ULL;
 
-    uint16_t hts = 0, vts = 0;
-    // read HTS and VTS
-    if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS_MSB, &tmp, 1)
-    			!= OV02C_OK) {
-    		ret = OV02C_ERROR;
-    		goto exit_exp;
+	uint16_t hts = 0, vts = 0;
+	// read HTS and VTS
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS, (uint8_t*) &hts,
+			2) != OV02C_OK) {
+		ret = OV02C_ERROR;
+		goto exit_exp;
 	}
-    hts = tmp << 8;
-    if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS_LSB, &tmp, 1)
-				!= OV02C_OK) {
-			ret = OV02C_ERROR;
-			goto exit_exp;
+	hts = SWAP_ENDIAN16(hts);
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts,
+			2) != OV02C_OK) {
+		ret = OV02C_ERROR;
+		goto exit_exp;
 	}
-    hts |= tmp;
-    if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS_MSB, &tmp, 1)
-				!= OV02C_OK) {
-			ret = OV02C_ERROR;
-			goto exit_exp;
+	vts = SWAP_ENDIAN16(vts);
+	/* Calculate number of lines (rounded) */
+	uint32_t line_us = (hts * 1000000) / pixel_clock;
+	uint32_t lines = exposure_us / line_us;
+
+	/* Clamp to sensor limits */
+	if (lines < OV02C_EXPOSURE_MIN_LINES)
+		lines = OV02C_EXPOSURE_MIN_LINES;
+	if (lines > vts - OV02C_EXPOSURE_MAX_LINES_MARGIN)
+		lines = vts - OV02C_EXPOSURE_MAX_LINES_MARGIN; /* 16-bit register limit */
+
+	// TODO maybe add hold functionality
+
+	/* Write exposure lines (16-bit: 0x3501 = MSB, 0x3502 = LSB) */
+	uint16_t exp_val = SWAP_ENDIAN16((uint16_t )lines);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_EXPOSURE, (uint8_t*) &exp_val, 2)
+			!= 0) {
+		ret = OV02C_ERROR;
+		goto exit_exp;
 	}
-	vts = tmp << 8;
-	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS_LSB, &tmp, 1)
-				!= OV02C_OK) {
-			ret = OV02C_ERROR;
-			goto exit_exp;
-	}
-	vts |= tmp;
-    /* Calculate number of lines (rounded) */
-    uint32_t line_us = (hts * 1000000) / pixel_clock;
-    uint32_t lines = exposure_us / line_us;
-
-    /* Clamp to sensor limits */
-    if (lines < OV02C_EXPOSURE_MIN_LINES) lines = OV02C_EXPOSURE_MIN_LINES;
-    if (lines > vts - OV02C_EXPOSURE_MAX_LINES_MARGIN) lines = vts - OV02C_EXPOSURE_MAX_LINES_MARGIN; /* 16-bit register limit */
-
-    // TODO maybe add hold functionality
-
-    /* Write exposure lines (16-bit: 0x3501 = MSB, 0x3502 = LSB) */
-    {
-        uint16_t exp_val = (uint16_t)lines;
-        tmp = (exp_val >> 8) & 0xFF;
-        if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_EXPOSURE, &tmp, 1) != 0) { ret = OV02C_ERROR; goto exit_exp; }
-        tmp = exp_val & 0xFF;
-        if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_EXPOSURE + 1, &tmp, 1) != 0) { ret = OV02C_ERROR; goto exit_exp; }
-    }
-
-exit_exp:
-    // TODO: maybe add hold functionality if possible
-    return ret;
+	exit_exp:
+	// TODO: maybe add hold functionality if possible
+	return ret;
 }
 
 int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config) {
@@ -620,8 +619,7 @@ int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config) 
 
 	uint16_t shift_x = 0x0003, shift_y = 0x0003;
 
-	switch (Config)
-	{
+	switch (Config) {
 	case OV02C_FLIP:
 		tmp = 0xa0;
 		shift_x -= 1;  // to keep same Bayer pattern
@@ -640,40 +638,21 @@ int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config) 
 		tmp = 0xa8;
 		break;
 	}
-	if(ov02c_write_reg(&pObj->Ctx, OV02C_REG_FORMAT, &tmp, 1) != OV02C_OK)
-	{
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_FORMAT, &tmp, 1) != OV02C_OK) {
 		ret = OV02C_ERROR;
 		goto exit_mirrorflip;
 	}
-	tmp = (shift_x >> 8) & 0xFF;
-	if(ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_X_WIN_CONTROL, &tmp, 1) != OV02C_OK)
-	{
+	shift_x = SWAP_ENDIAN16(shift_x);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_X_WIN_CONTROL,
+			(uint8_t*) &shift_x, 2) != OV02C_OK) {
 		ret = OV02C_ERROR;
 		goto exit_mirrorflip;
 	}
-	tmp = shift_x & 0xFF;
-	if(ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_X_WIN_CONTROL + 1, &tmp, 1) != OV02C_OK)
-	{
+	shift_y = SWAP_ENDIAN16(shift_y);
+	if (ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_Y_WIN_CONTROL,
+			(uint8_t*) &shift_y, 2) != OV02C_OK) {
 		ret = OV02C_ERROR;
 		goto exit_mirrorflip;
 	}
-	tmp = (shift_y >> 8) & 0xFF;
-	if(ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_Y_WIN_CONTROL, &tmp, 1) != OV02C_OK)
-	{
-		ret = OV02C_ERROR;
-		goto exit_mirrorflip;
-	}
-	tmp = shift_y & 0xFF;
-	if(ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_Y_WIN_CONTROL + 1, &tmp, 1) != OV02C_OK)
-	{
-		ret = OV02C_ERROR;
-		goto exit_mirrorflip;
-	}
-exit_mirrorflip:
-	return ret;
-}
-
-int32_t OV02C_SetTestPattern(OV02C_Object_t *pObj, int32_t mode) {
-	int32_t ret = OV02C_ERROR;
-	return ret;
+	exit_mirrorflip: return ret;
 }
