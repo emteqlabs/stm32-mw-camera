@@ -29,7 +29,7 @@ typedef struct
   OV02C_IO_t         IO;
   ov02c_ctx_t        Ctx;
   uint8_t            IsInitialized;
-  uint64_t 			 Pclk;
+  uint64_t 			 Pclk;  // Hz
 } OV02C_Object_t;
 
 typedef struct

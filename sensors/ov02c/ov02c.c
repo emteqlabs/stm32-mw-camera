@@ -280,7 +280,9 @@ static int32_t OV02C_Delay(OV02C_Object_t *pObj, uint32_t Delay);
 static int32_t OV02C_SetAnalogGain(OV02C_Object_t *pObj, float gain_dBm);
 static int32_t OV02C_SetDigitalGain(OV02C_Object_t *pObj, float gain_dBm);
 
-static int32_t OV02C_GetPCLK(OV02C_Object_t *pObj,  uint64_t* pclk);
+static int32_t OV02C_GetPCLK(OV02C_Object_t *pObj, uint64_t *pclk);
+static int32_t OV02C_GetExposureRange(OV02C_Object_t *pObj, uint32_t *min_us,
+		uint32_t *max_us);
 
 static uint32_t map_range_to_uint32(float value, float in_min, float in_max,
 		uint32_t out_min, uint32_t out_max) {
@@ -492,9 +494,12 @@ int32_t OV02C_GetSensorInfo(OV02C_Object_t *pObj, OV02C_SensorInfo_t *Info) {
 	Info->height = OV02C_HEIGHT;
 	Info->gain_min = OV02C_GAIN_MIN;
 	Info->gain_max = OV02C_GAIN_MAX;
-	Info->exposure_min = OV02C_EXPOSURE_MIN;
-	Info->exposure_max = OV02C_EXPOSURE_MAX;
-
+	if (OV02C_GetExposureRange(pObj, &Info->exposure_min,
+			&Info->exposure_max) != OV02C_OK) {
+		// defaults
+		Info->exposure_min = OV02C_EXPOSURE_MIN;
+		Info->exposure_max = OV02C_EXPOSURE_MAX;
+	}
 	return OV02C_OK;
 }
 
@@ -689,8 +694,31 @@ static int32_t OV02C_GetPCLK(OV02C_Object_t *pObj, uint64_t *pclk) {
 	exit_pclk: return ret;
 }
 
+static int32_t OV02C_GetExposureRange(OV02C_Object_t *pObj, uint32_t *min_us,
+		uint32_t *max_us) {
+	int32_t ret = OV02C_OK;
+
+	uint64_t pclk = pObj->Pclk;
+	uint16_t hts = 0, vts = 0;
+	// read HTS and VTS
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS, (uint8_t*) &hts, 2) != 0) {
+		ret = OV02C_ERROR;
+		goto exit_exp_range;
+	}
+	hts = SWAP_ENDIAN16(hts);
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts, 2) != 0) {
+		ret = OV02C_ERROR;
+		goto exit_exp_range;
+	}
+	vts = SWAP_ENDIAN16(vts);
+	uint32_t line_us = (hts * 1000000) / pclk;
+	*min_us = OV02C_EXPOSURE_MIN_LINES * line_us;
+	*max_us = (vts - 15) * line_us;
+	exit_exp_range: return ret;
+}
+
 int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
-	int32_t ret = 0;
+	int32_t ret = OV02C_OK;
 
 	// Exposure calculations
 	// line time (t_line) = Horizontal Total Size (HTS) / Pixel Clock (PCLK)

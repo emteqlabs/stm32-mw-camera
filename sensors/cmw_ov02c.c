@@ -142,6 +142,8 @@ static int32_t CMW_OV02C_GetSensorInfo(void *io_ctx, ISP_SensorInfoTypeDef *info
   {
     return CMW_ERROR_WRONG_PARAM;
   }
+  OV02C_SensorInfo_t sensor_info;
+  OV02C_GetSensorInfo(&((CMW_OV02C_t *)io_ctx)->ctx_driver, &sensor_info);
 
   if (sizeof(info->name) >= strlen(OV02C_NAME) + 1)
   {
@@ -152,16 +154,16 @@ static int32_t CMW_OV02C_GetSensorInfo(void *io_ctx, ISP_SensorInfoTypeDef *info
     return CMW_ERROR_COMPONENT_FAILURE;
   }
 
-  info->bayer_pattern = OV02C_BAYER_PATTERN;
-  info->color_depth = OV02C_COLOR_DEPTH;
-  info->width = OV02C_WIDTH;
-  info->height = OV02C_HEIGHT;
+  info->bayer_pattern = sensor_info.bayer_pattern;
+  info->color_depth = sensor_info.color_depth;
+  info->width = sensor_info.width;
+  info->height = sensor_info.height;
 
-  info->gain_min = OV02C_GAIN_MIN;
-  info->gain_max = OV02C_GAIN_MAX;
+  info->gain_min = sensor_info.gain_min;
+  info->gain_max = sensor_info.gain_max;
 
-  info->exposure_min = OV02C_EXPOSURE_MIN;
-  info->exposure_max = OV02C_EXPOSURE_MAX;
+  info->exposure_min = sensor_info.exposure_min;
+  info->exposure_max = sensor_info.exposure_max;
 
   return CMW_ERROR_NONE;
 }
@@ -225,14 +227,14 @@ static int32_t CMW_OV02C_Run(void *io_ctx)
 static void CMW_OV02C_PowerOn(CMW_OV02C_t *io_ctx)
 {
   io_ctx->ShutdownPin(0);   // xshutdown should be 0 before power on
-  io_ctx->Delay(100);
+  io_ctx->Delay(10);
   io_ctx->EnablePin(0);     // power off
-  io_ctx->Delay(100);
+  io_ctx->Delay(10);
 
   io_ctx->EnablePin(1);     // power on
-  io_ctx->Delay(100);
+  io_ctx->Delay(20);
   io_ctx->ShutdownPin(1);   // xshutdown should be 1 after power on
-  io_ctx->Delay(100);
+  io_ctx->Delay(20);
 }
 
 static void CMW_OV02C_VsyncEventCallback(void *io_ctx, uint32_t pipe)
