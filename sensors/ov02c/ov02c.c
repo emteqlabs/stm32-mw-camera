@@ -252,9 +252,6 @@ static const struct regval ov02c10_input_24M_MIPI_2lane_raw10_1928x1082_30fps[] 
 	{0x3016, 0x32},
 };
 
-static const int OV02C_VTS = 2328;
-static const int OV02C_HTS = 1140;
-
 //static const struct regval test_pattern_enable_regs[] = { };
 //
 //static const struct regval test_pattern_disable_regs[] = { };
@@ -566,8 +563,33 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us)
     // Vertical Total Size (VTS) = Exposure (t_exposure) / t_line = Exposure / (HTS / PCLK)
     // PCLK = FPS * HTS * VTS
     uint64_t pixel_clock = 80000000ULL;
-    uint32_t hts = OV02C_HTS;  // from config registers (TODO read the regs)
-    uint32_t vts = OV02C_VTS;  // from config registers (TODO read the regs
+
+    uint16_t hts = 0, vts = 0;
+    // read HTS and VTS
+    if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS_MSB, &tmp, 1)
+    			!= OV02C_OK) {
+    		ret = OV02C_ERROR;
+    		goto exit_exp;
+	}
+    hts = tmp << 8;
+    if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS_LSB, &tmp, 1)
+				!= OV02C_OK) {
+			ret = OV02C_ERROR;
+			goto exit_exp;
+	}
+    hts |= tmp;
+    if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS_MSB, &tmp, 1)
+				!= OV02C_OK) {
+			ret = OV02C_ERROR;
+			goto exit_exp;
+	}
+	vts = tmp << 8;
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS_LSB, &tmp, 1)
+				!= OV02C_OK) {
+			ret = OV02C_ERROR;
+			goto exit_exp;
+	}
+	vts |= tmp;
     /* Calculate number of lines (rounded) */
     uint32_t line_us = (hts * 1000000) / pixel_clock;
     uint32_t lines = exposure_us / line_us;
