@@ -614,8 +614,62 @@ exit_exp:
     return ret;
 }
 
-int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, uint32_t Config) {
-	int32_t ret = OV02C_ERROR;
+int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config) {
+	int32_t ret = OV02C_OK;
+	uint8_t tmp;
+
+	uint16_t shift_x = 0x0003, shift_y = 0x0003;
+
+	switch (Config)
+	{
+	case OV02C_FLIP:
+		tmp = 0xa0;
+		shift_x -= 1;  // to keep same Bayer pattern
+		break;
+	case OV02C_MIRROR:
+		tmp = 0xb8;
+		shift_y -= 1;
+		break;
+	case OV02C_MIRROR_FLIP:
+		tmp = 0xb0;
+		shift_x -= 1;
+		shift_y -= 1;
+		break;
+	case OV02C_MIRROR_FLIP_NONE:
+	default:
+		tmp = 0xa8;
+		break;
+	}
+	if(ov02c_write_reg(&pObj->Ctx, OV02C_REG_FORMAT, &tmp, 1) != OV02C_OK)
+	{
+		ret = OV02C_ERROR;
+		goto exit_mirrorflip;
+	}
+	tmp = (shift_x >> 8) & 0xFF;
+	if(ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_X_WIN_CONTROL, &tmp, 1) != OV02C_OK)
+	{
+		ret = OV02C_ERROR;
+		goto exit_mirrorflip;
+	}
+	tmp = shift_x & 0xFF;
+	if(ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_X_WIN_CONTROL + 1, &tmp, 1) != OV02C_OK)
+	{
+		ret = OV02C_ERROR;
+		goto exit_mirrorflip;
+	}
+	tmp = (shift_y >> 8) & 0xFF;
+	if(ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_Y_WIN_CONTROL, &tmp, 1) != OV02C_OK)
+	{
+		ret = OV02C_ERROR;
+		goto exit_mirrorflip;
+	}
+	tmp = shift_y & 0xFF;
+	if(ov02c_write_reg(&pObj->Ctx, OV02C10_REG_ISP_Y_WIN_CONTROL + 1, &tmp, 1) != OV02C_OK)
+	{
+		ret = OV02C_ERROR;
+		goto exit_mirrorflip;
+	}
+exit_mirrorflip:
 	return ret;
 }
 

@@ -36,15 +36,17 @@
 #define OV02C_ANALOG_GAIN_MAX_REG			0x0F80
 #define OV02C_DIGITAL_GAIN_MIN_REG			0x010000
 #define OV02C_DIGITAL_GAIN_MAX_REG			0x0FFFC0
-
 #define OV02C_GAIN_MIN						0      // dBm
 #define OV02C_GAIN_MAX						47610  // dBm
 
 #define OV02C_REG_HTS_MSB			0x380C
 #define OV02C_REG_HTS_LSB			0x380D
-
 #define OV02C_REG_VTS_MSB			0x380E
 #define OV02C_REG_VTS_LSB			0x380F
+
+#define OV02C_REG_FORMAT				0x3820
+#define OV02C10_REG_ISP_X_WIN_CONTROL	0x3810
+#define OV02C10_REG_ISP_Y_WIN_CONTROL	0x3812
 
 #define OV02C_BAYER_PATTERN      	0x01 /* From ISP definition BGGR / TODO comnon enumeration in camera */
 #define OV02C_COLOR_DEPTH        	10 /* in bits */

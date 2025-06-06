@@ -29,9 +29,24 @@ static int CMW_OV02C_GetResType(uint32_t width, uint32_t height, uint32_t*res)
 
 static int32_t CMW_OV02C_getMirrorFlipConfig(uint32_t Config)
 {
-  // NOT IMPLEMENTED YET
-  int32_t ret = 0;
-  return ret;
+	int32_t ret;
+	switch (Config)
+	{
+	case CMW_MIRRORFLIP_NONE:
+	  ret = OV02C_MIRROR_FLIP_NONE;
+	  break;
+	case CMW_MIRRORFLIP_FLIP:
+	  ret = OV02C_FLIP;
+	  break;
+	case CMW_MIRRORFLIP_MIRROR:
+	  ret = OV02C_MIRROR;
+	  break;
+	case CMW_MIRRORFLIP_FLIP_MIRROR:
+	default:
+	  ret = OV02C_MIRROR_FLIP;
+	  break;
+	}
+	return ret;
 }
 
 static int32_t CMW_OV02C_DeInit(void *io_ctx)
@@ -117,7 +132,8 @@ static int32_t CMW_OV02C_SetFramerate(void *io_ctx, int32_t framerate)
 
 static int32_t CMW_OV02C_SetMirrorFlip(void *io_ctx, uint32_t config)
 {
-  return CMW_ERROR_FEATURE_NOT_SUPPORTED;
+	int32_t mirrorFlip = CMW_OV02C_getMirrorFlipConfig(config);
+	return OV02C_MirrorFlipConfig(&((CMW_OV02C_t *)io_ctx)->ctx_driver, mirrorFlip);
 }
 
 static int32_t CMW_OV02C_GetSensorInfo(void *io_ctx, ISP_SensorInfoTypeDef *info)

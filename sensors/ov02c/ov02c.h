@@ -66,6 +66,14 @@ typedef struct
   uint32_t exposure_max;
 } OV02C_SensorInfo_t;
 
+// flip/mirror
+typedef enum {
+  OV02C_MIRROR_FLIP_NONE,
+  OV02C_FLIP,
+  OV02C_MIRROR,
+  OV02C_MIRROR_FLIP
+} OV02C_MirrorFlip_t;
+
 typedef struct
 {
   int32_t  (*Init              )(OV02C_Object_t*, uint32_t, uint32_t);
@@ -78,7 +86,7 @@ typedef struct
   int32_t  (*SetSaturation     )(OV02C_Object_t*, int32_t);
   int32_t  (*SetContrast       )(OV02C_Object_t*, int32_t);
   int32_t  (*SetHueDegree      )(OV02C_Object_t*, int32_t);
-  int32_t  (*MirrorFlipConfig  )(OV02C_Object_t*, uint32_t);
+  int32_t  (*MirrorFlipConfig  )(OV02C_Object_t*, OV02C_MirrorFlip_t);
   int32_t  (*ZoomConfig        )(OV02C_Object_t*, uint32_t);
   int32_t  (*SetResolution     )(OV02C_Object_t*, uint32_t);
   int32_t  (*GetResolution     )(OV02C_Object_t*, uint32_t*);
@@ -97,6 +105,15 @@ typedef struct
 #define OV02C_OK                      (0)
 #define OV02C_ERROR                   (-1)
 
+// resolutions
+#define OV02C_RESOLUTION_1928_1082	1
+
+// formats
+#define OV02C_RAW_GRBG10 1
+
+/* CAMERA driver structure */
+extern OV02C_CAMERA_Drv_t   OV02C_CAMERA_Driver;
+
 int32_t OV02C_RegisterBusIO(OV02C_Object_t *pObj, OV02C_IO_t *pIO);
 int32_t OV02C_Init(OV02C_Object_t *pObj, uint32_t Resolution, uint32_t PixelFormat);
 int32_t OV02C_DeInit(OV02C_Object_t *pObj);
@@ -107,18 +124,9 @@ int32_t OV02C_SetGain(OV02C_Object_t *pObj, int32_t gain);
 int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure);
 int32_t OV02C_SetFrequency(OV02C_Object_t *pObj, int32_t frequency);
 int32_t OV02C_SetFramerate(OV02C_Object_t *pObj, int32_t framerate);
-int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, uint32_t Config);
+int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config);
 int32_t OV02C_GetSensorInfo(OV02C_Object_t *pObj, OV02C_SensorInfo_t *Info);
 int32_t OV02C_SetTestPattern(OV02C_Object_t *pObj, int32_t mode);
-
-// resolutions
-#define OV02C_RESOLUTION_1928_1082	1
-
-// formats
-#define OV02C_RAW_GRBG10 1
-
-/* CAMERA driver structure */
-extern OV02C_CAMERA_Drv_t   OV02C_CAMERA_Driver;
 
 #ifdef __cplusplus
 }
