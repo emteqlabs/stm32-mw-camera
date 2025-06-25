@@ -31,6 +31,7 @@ extern "C" {
 #define CAMERA_VD55G1_ADDRESS          0x20U
 #define CAMERA_VD55G1_FREQ_IN_HZ       12000000U
 #define CAMERA_OV02C_ADDRESS           0x6CU
+#define CAMERA_OV2740_ADDRESS          0x6CU
 
 #if defined (STM32N657xx)
 
@@ -57,7 +58,13 @@ extern "C" {
   #define EN_CAM_PORT                     GPIOD
   /* PD2 on VDD Core */
   #define EN_CAM_GPIO_ENABLE_VDDIO()
-  #define EN_CAM_GPIO_CLK_ENABLE()          __HAL_RCC_GPIOD_CLK_ENABLE()
+  #define EN_CAM_GPIO_CLK_ENABLE()        __HAL_RCC_GPIOD_CLK_ENABLE()
+
+  #define XSHUTDN_CAM_PIN                 GPIO_PIN_6
+  #define XSHUTDN_CAM_PORT                GPIOD
+  /* PD2 on VDD Core */
+  #define XSHUTDN_CAM_GPIO_ENABLE_VDDIO()
+  #define XSHUTDN_CAM_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOD_CLK_ENABLE()
 #endif /* STM32N6570_NUCLEO_REV */
 
 #ifdef STM32N6570_NUCLEO_REV

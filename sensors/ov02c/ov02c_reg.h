@@ -51,7 +51,7 @@
 #define OV02C10_REG_ISP_X_WIN_CONTROL	0x3810
 #define OV02C10_REG_ISP_Y_WIN_CONTROL	0x3812
 
-#define OV02C_BAYER_PATTERN      	0x01 /* From ISP definition BGGR / TODO comnon enumeration in camera */
+#define OV02C_BAYER_PATTERN      	0x01 /* From ISP definition */
 #define OV02C_COLOR_DEPTH        	10 /* in bits */
 
 #define OV02C_WIDTH              	1928
@@ -69,8 +69,6 @@ typedef struct
 
 int32_t ov02c_write_reg(ov02c_ctx_t *ctx, uint16_t reg, uint8_t *pdata, uint16_t length);
 int32_t ov02c_read_reg(ov02c_ctx_t *ctx, uint16_t reg, uint8_t *pdata, uint16_t length);
-
-int32_t ov02c_register_set(ov02c_ctx_t *ctx, uint16_t reg, uint8_t value);
 
 #ifdef __cplusplus
 }
