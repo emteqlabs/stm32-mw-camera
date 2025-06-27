@@ -581,42 +581,32 @@ int32_t OV2740_SetExposure(OV2740_Object_t *pObj, int32_t exposure_us) {
 
 int32_t OV2740_MirrorFlipConfig(OV2740_Object_t *pObj, OV2740_MirrorFlip_t Config) {
 	int32_t ret = OV2740_OK;
-	uint8_t tmp;
-
-	uint16_t shift_x = 0x0003, shift_y = 0x0003;
+	uint8_t fmt1 = 0, fmt2 = 0;
 
 	switch (Config) {
 	case OV2740_FLIP:
-		tmp = 0xa0;
-		shift_x -= 1;  // to keep same Bayer pattern
+		fmt1 = 0x06;
+		fmt2 = 0x46;
 		break;
 	case OV2740_MIRROR:
-		tmp = 0xb8;
-		shift_y -= 1;
+		fmt1 = 0x00;
+		fmt2 = 0x00;
 		break;
 	case OV2740_MIRROR_FLIP:
-		tmp = 0xb0;
-		shift_x -= 1;
-		shift_y -= 1;
+		fmt1 = 0x06;
+		fmt2 = 0x00;
 		break;
 	case OV2740_MIRROR_FLIP_NONE:
 	default:
-		tmp = 0xa8;
+		fmt1 = 0x00;
+		fmt2 = 0x46;
 		break;
 	}
-	if (ov2740_write_reg(&pObj->Ctx, OV2740_REG_FORMAT, &tmp, 1) != OV2740_OK) {
+	if (ov2740_write_reg(&pObj->Ctx, OV2740_REG_FORMAT1, &fmt1, 1) != OV2740_OK) {
 		ret = OV2740_ERROR;
 		goto exit_mirrorflip;
 	}
-	shift_x = SWAP_ENDIAN16(shift_x);
-	if (ov2740_write_reg(&pObj->Ctx, OV2740_REG_ISP_X_WIN_CONTROL,
-			(uint8_t*) &shift_x, 2) != OV2740_OK) {
-		ret = OV2740_ERROR;
-		goto exit_mirrorflip;
-	}
-	shift_y = SWAP_ENDIAN16(shift_y);
-	if (ov2740_write_reg(&pObj->Ctx, OV2740_REG_ISP_Y_WIN_CONTROL,
-			(uint8_t*) &shift_y, 2) != OV2740_OK) {
+	if (ov2740_write_reg(&pObj->Ctx, OV2740_REG_FORMAT2, &fmt2, 1) != OV2740_OK) {
 		ret = OV2740_ERROR;
 		goto exit_mirrorflip;
 	}
