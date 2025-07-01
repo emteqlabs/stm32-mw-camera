@@ -111,9 +111,9 @@ static const struct regval ov2740_MIPI_2lane_raw10_1932x1092_360mhz[] = {
 	{0x3809, 0x88},
 	{0x380a, 0x04},
 	{0x380b, 0x40},
-	{0x380c, 0x04},
+	{0x380c, 0x04},  // hts
 	{0x380d, 0x38},
-	{0x380e, 0x06},
+	{0x380e, 0x06},  // vts
 	{0x380f, 0xf0},
 	{0x3810, 0x00},
 	{0x3811, 0x04},
@@ -197,7 +197,6 @@ static int32_t OV2740_WriteRegWrap(void *handle, uint16_t Reg, uint8_t *Data,
 static int32_t OV2740_Delay(OV2740_Object_t *pObj, uint32_t Delay);
 
 static int32_t OV2740_SetAnalogGain(OV2740_Object_t *pObj, float gain_dBm);
-static int32_t OV2740_SetDigitalGain(OV2740_Object_t *pObj, float gain_dBm);
 
 static int32_t OV2740_GetPCLK(OV2740_Object_t *pObj, uint64_t *pclk);
 static int32_t OV2740_GetExposureRange(OV2740_Object_t *pObj, uint32_t *min_us,
@@ -447,31 +446,6 @@ static int32_t OV2740_SetAnalogGain(OV2740_Object_t *pObj, float gain_dBm) {
 	exit_gain: return ret;
 }
 
-static int32_t OV2740_SetDigitalGain(OV2740_Object_t *pObj, float gain_dBm) {
-	int ret = OV2740_OK;
-	if (gain_dBm < 0) {
-		gain_dBm = 0;
-	} else if (gain_dBm > OV2740_DIGITAL_GAIN_MAX_DBM) {
-		gain_dBm = OV2740_DIGITAL_GAIN_MAX_DBM;
-	}
-	// convert dBm to linear gain
-	float linear_gain = MDECIBEL_TO_LINEAR(gain_dBm);
-	if (linear_gain > OV2740_DIGITAL_GAIN_MAX_LINEAR) {
-		linear_gain = OV2740_DIGITAL_GAIN_MAX_LINEAR;
-	}
-	// convert linear gain to register value
-	uint32_t reg_value = map_range_to_uint32(linear_gain, 1.0f,
-			OV2740_DIGITAL_GAIN_MAX_LINEAR, OV2740_DIGITAL_GAIN_MIN_REG,
-			OV2740_DIGITAL_GAIN_MAX_REG);
-	reg_value = SWAP_ENDIAN32(reg_value);
-//	if (ov2740_write_reg(&pObj->Ctx, OV2740_REG_DIGITAL_GAIN,
-//			((uint8_t*) &reg_value) + 1, 3) != OV2740_OK) {
-//		ret = OV2740_ERROR;
-//		goto exit_gain;
-//	}
-	exit_gain: return ret;
-}
-
 int32_t OV2740_SetGain(OV2740_Object_t *pObj, int32_t gain_dBm) {
 	int32_t ret = 0;
 
@@ -489,11 +463,6 @@ int32_t OV2740_SetGain(OV2740_Object_t *pObj, int32_t gain_dBm) {
 		ret = OV2740_ERROR;
 		goto exit_gain;
 	}
-	if (OV2740_SetDigitalGain(pObj, digital_gain_dBm) != OV2740_OK) {
-		ret = OV2740_ERROR;
-		goto exit_gain;
-	}
-
 	exit_gain: return ret;
 }
 
