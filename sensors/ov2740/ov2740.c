@@ -458,7 +458,6 @@ int32_t OV2740_SetGain(OV2740_Object_t *pObj, int32_t gain_dBm) {
 	float analog_gain_dBm =
 			(gain_dBm > OV2740_ANALOG_GAIN_MAX_DBM) ?
 					OV2740_ANALOG_GAIN_MAX_DBM : gain_dBm;
-	float digital_gain_dBm = gain_dBm - analog_gain_dBm;
 	if (OV2740_SetAnalogGain(pObj, analog_gain_dBm) != OV2740_OK) {
 		ret = OV2740_ERROR;
 		goto exit_gain;
@@ -468,7 +467,7 @@ int32_t OV2740_SetGain(OV2740_Object_t *pObj, int32_t gain_dBm) {
 
 static int32_t OV2740_GetPCLK(OV2740_Object_t *pObj, uint64_t *pclk)
 {
-    *pclk = 720000000U * 2 * 2 / 10;  // link freq * 2 (DDR) * 2 (lanes) / 10 (RAW10)
+    *pclk = 360000000U * 2 * 2 / 10;  // link freq * 2 (DDR) * 2 (lanes) / 10 (RAW10)
     return 0;
 }
 
