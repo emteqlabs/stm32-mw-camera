@@ -1000,7 +1000,7 @@ static int32_t CMW_CAMERA_VD55G1_Init( CMW_Sensor_Init_t *initSensors_params)
   camera_bsp.vd55g1_bsp.DeInit      = CMW_I2C_DEINIT;
   camera_bsp.vd55g1_bsp.WriteReg    = CMW_I2C_WRITEREG16;
   camera_bsp.vd55g1_bsp.ReadReg     = CMW_I2C_READREG16;
-  camera_bsp.vd55g1_bsp.Delay       = HAL_Delay;
+  camera_bsp.vd55g1_bsp.Delay       = BSP_Delay;
   camera_bsp.vd55g1_bsp.ShutdownPin = CMW_CAMERA_ShutdownPin;
   camera_bsp.vd55g1_bsp.EnablePin   = CMW_CAMERA_EnablePin;
 
@@ -1071,7 +1071,7 @@ static int32_t CMW_CAMERA_VD66GY_Init( CMW_Sensor_Init_t *initSensors_params)
   camera_bsp.vd66gy_bsp.DeInit      = CMW_I2C_DEINIT;
   camera_bsp.vd66gy_bsp.ReadReg     = CMW_I2C_READREG16;
   camera_bsp.vd66gy_bsp.WriteReg    = CMW_I2C_WRITEREG16;
-  camera_bsp.vd66gy_bsp.Delay       = HAL_Delay;
+  camera_bsp.vd66gy_bsp.Delay       = BSP_Delay;
   camera_bsp.vd66gy_bsp.ShutdownPin = CMW_CAMERA_ShutdownPin;
   camera_bsp.vd66gy_bsp.EnablePin   = CMW_CAMERA_EnablePin;
   camera_bsp.vd66gy_bsp.hdcmipp     = &hcamera_dcmipp;
@@ -1148,7 +1148,7 @@ static int32_t CMW_CAMERA_IMX335_Init(CMW_Sensor_Init_t *initSensors_params)
   camera_bsp.imx335_bsp.ReadReg     = CMW_I2C_READREG16;
   camera_bsp.imx335_bsp.WriteReg    = CMW_I2C_WRITEREG16;
   camera_bsp.imx335_bsp.GetTick     = BSP_GetTick;
-  camera_bsp.imx335_bsp.Delay       = HAL_Delay;
+  camera_bsp.imx335_bsp.Delay       = BSP_Delay;
   camera_bsp.imx335_bsp.ShutdownPin = CMW_CAMERA_ShutdownPin;
   camera_bsp.imx335_bsp.EnablePin   = CMW_CAMERA_EnablePin;
   camera_bsp.imx335_bsp.hdcmipp     = &hcamera_dcmipp;
@@ -1238,7 +1238,7 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
   camera_bsp.ov02c_bsp.ReadReg     = CMW_I2C_READREG16;
   camera_bsp.ov02c_bsp.WriteReg    = CMW_I2C_WRITEREG16;
   camera_bsp.ov02c_bsp.GetTick     = BSP_GetTick;
-  camera_bsp.ov02c_bsp.Delay       = HAL_Delay;
+  camera_bsp.ov02c_bsp.Delay       = BSP_Delay;
   camera_bsp.ov02c_bsp.ShutdownPin = CMW_CAMERA_ShutdownPin;
   camera_bsp.ov02c_bsp.EnablePin   = CMW_CAMERA_EnablePin;
   camera_bsp.ov02c_bsp.hdcmipp     = &hcamera_dcmipp;
