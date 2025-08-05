@@ -405,7 +405,7 @@ int32_t OV02C_DeInit(OV02C_Object_t *pObj) {
 }
 
 int32_t OV02C_Start(OV02C_Object_t *pObj) {
-	int ret;
+	int ret = OV02C_OK;
 	uint8_t tmp;
 	/* Start streaming */
 	tmp = OV02C_MODE_STREAMING;
