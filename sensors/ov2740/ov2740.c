@@ -284,7 +284,7 @@ int32_t OV2740_RegisterBusIO(OV2740_Object_t *pObj, OV2740_IO_t *pIO) {
 
 int32_t OV2740_Init(OV2740_Object_t *pObj, uint32_t Resolution,
 		uint32_t PixelFormat) {
-	UNUSED(PixelFormat);
+	(void)PixelFormat;
 	int32_t ret = OV2740_OK;
 
 	if (pObj->IsInitialized == 0U) {
@@ -468,7 +468,7 @@ int32_t OV2740_SetGain(OV2740_Object_t *pObj, int32_t gain_dBm) {
 
 static int32_t OV2740_GetPCLK(OV2740_Object_t *pObj, uint64_t *pclk)
 {
-	UNUSED(pObj);
+	(void)pObj;
     *pclk = 360000000U * 2 * 2 / 10;  // link freq * 2 (DDR) * 2 (lanes) / 10 (RAW10)
     return 0;
 }
@@ -525,8 +525,12 @@ int32_t OV2740_SetExposure(OV2740_Object_t *pObj, int32_t exposure_us) {
 	/* Clamp to sensor limits */
 	if (lines < OV2740_EXPOSURE_MIN_LINES)
 		lines = OV2740_EXPOSURE_MIN_LINES;
-	if (lines > vts - OV2740_EXPOSURE_MAX_LINES_MARGIN)
-		lines = vts - OV2740_EXPOSURE_MAX_LINES_MARGIN; /* 16-bit register limit */
+	if (lines + OV2740_EXPOSURE_MAX_LINES_MARGIN > vts)
+	{
+		lines = (vts >= OV2740_EXPOSURE_MAX_LINES_MARGIN)
+				? vts - OV2740_EXPOSURE_MAX_LINES_MARGIN
+				: OV2740_EXPOSURE_MAX_LINES_MARGIN;
+	}
 
 	// TODO maybe add hold functionality
 

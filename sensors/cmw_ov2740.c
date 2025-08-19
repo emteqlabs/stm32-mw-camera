@@ -122,11 +122,15 @@ int32_t CMW_OV2740_ListWBRefModes(void *io_ctx, uint32_t RefColorTemp[])
 
 static int32_t CMW_OV2740_SetFrequency(void *io_ctx, int32_t frequency)
 {
+  UNUSED(io_ctx);
+  UNUSED(frequency);
   return CMW_ERROR_FEATURE_NOT_SUPPORTED;
 }
 
 static int32_t CMW_OV2740_SetFramerate(void *io_ctx, int32_t framerate)
 {
+  UNUSED(io_ctx);
+  UNUSED(framerate);
   return CMW_ERROR_FEATURE_NOT_SUPPORTED;
 }
 
@@ -261,6 +265,8 @@ static void CMW_OV2740_VsyncEventCallback(void *io_ctx, uint32_t pipe)
 
 static void CMW_OV2740_FrameEventCallback(void *io_ctx, uint32_t pipe)
 {
+  UNUSED(io_ctx);
+  UNUSED(pipe);
 }
 
 int CMW_OV2740_Probe(CMW_OV2740_t *io_ctx, CMW_Sensor_if_t *ov2740_if)
