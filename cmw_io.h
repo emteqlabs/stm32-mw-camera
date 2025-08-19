@@ -62,7 +62,7 @@ extern "C" {
 
   #define XSHUTDN_CAM_PIN                 GPIO_PIN_6
   #define XSHUTDN_CAM_PORT                GPIOD
-  /* PD2 on VDD Core */
+  /* PD6 on VDD Core */
   #define XSHUTDN_CAM_GPIO_ENABLE_VDDIO()
   #define XSHUTDN_CAM_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOD_CLK_ENABLE()
 #endif /* STM32N6570_NUCLEO_REV */
@@ -87,7 +87,27 @@ extern "C" {
 #define CSI2_CLK_RELEASE_RESET()        __HAL_RCC_CSI_RELEASE_RESET()
 
 #else
-#error Add camera configuration GPIO for your specific board
+// Ensure to add the correct defines in the CMW config header file
+// check below for reference
+//#define NRST_CAM_PIN                    GPIO_PIN_8
+//#define NRST_CAM_PORT                   GPIOC
+//#define NRST_CAM_GPIO_ENABLE_VDDIO()    HAL_PWREx_EnableVddIO4();
+//#define NRST_CAM_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOC_CLK_ENABLE();
+
+//#define EN_CAM_PIN                      GPIO_PIN_2
+//#define EN_CAM_PORT                     GPIOD
+//#define EN_CAM_GPIO_ENABLE_VDDIO()
+//#define EN_CAM_GPIO_CLK_ENABLE()        __HAL_RCC_GPIOD_CLK_ENABLE()
+
+//#define XSHUTDN_CAM_PIN                 GPIO_PIN_6
+//#define XSHUTDN_CAM_PORT                GPIOD
+//#define XSHUTDN_CAM_GPIO_ENABLE_VDDIO()
+//#define XSHUTDN_CAM_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOD_CLK_ENABLE()
+
+//#define CMW_I2C_INIT BSP_I2C2_Init
+//#define CMW_I2C_DEINIT BSP_I2C2_DeInit
+//#define CMW_I2C_READREG16 BSP_I2C2_ReadReg16
+//#define CMW_I2C_WRITEREG16 BSP_I2C2_WriteReg16
 #endif
 
 #ifdef __cplusplus

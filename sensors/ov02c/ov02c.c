@@ -366,6 +366,7 @@ int32_t OV02C_RegisterBusIO(OV02C_Object_t *pObj, OV02C_IO_t *pIO) {
 
 int32_t OV02C_Init(OV02C_Object_t *pObj, uint32_t Resolution,
 		uint32_t PixelFormat) {
+	UNUSED(PixelFormat);
 	int32_t ret = OV02C_OK;
 
 	if (pObj->IsInitialized == 0U) {
@@ -686,6 +687,10 @@ static int32_t OV02C_GetPCLK(OV02C_Object_t *pObj, uint64_t *pclk) {
 	PLL2_DACCLK = PLL2_VCO / PLL2_DivDac;
 	PLL2_SRAMCLK = PLL2_VCO / PLL2_SRAMDiv;
 	PLL2_SA1CLK = PLL2_VCO / PLL2_Sa1Div;
+
+	UNUSED(PLL2_SRAMCLK);
+	UNUSED(PLL2_DACCLK);
+	UNUSED(PLL2_SCLK);
 
 	// Output SA1 clock as PCLK, in Hz
 	*pclk = ((uint64_t) PLL2_SA1CLK * 1000000);

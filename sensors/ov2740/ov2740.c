@@ -284,6 +284,7 @@ int32_t OV2740_RegisterBusIO(OV2740_Object_t *pObj, OV2740_IO_t *pIO) {
 
 int32_t OV2740_Init(OV2740_Object_t *pObj, uint32_t Resolution,
 		uint32_t PixelFormat) {
+	UNUSED(PixelFormat);
 	int32_t ret = OV2740_OK;
 
 	if (pObj->IsInitialized == 0U) {
@@ -467,6 +468,7 @@ int32_t OV2740_SetGain(OV2740_Object_t *pObj, int32_t gain_dBm) {
 
 static int32_t OV2740_GetPCLK(OV2740_Object_t *pObj, uint64_t *pclk)
 {
+	UNUSED(pObj);
     *pclk = 360000000U * 2 * 2 / 10;  // link freq * 2 (DDR) * 2 (lanes) / 10 (RAW10)
     return 0;
 }

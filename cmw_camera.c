@@ -945,6 +945,7 @@ static void CMW_CAMERA_XShutdownPin(int value)
 #if defined(USE_VD66GY_SENSOR) || defined(USE_IMX335_SENSOR) || defined(USE_OV02C_SENSOR) || defined(USE_OV2740_SENSOR)
 static ISP_StatusTypeDef CB_ISP_SetSensorGain(uint32_t camera_instance, int32_t gain)
 {
+  UNUSED(camera_instance);
   if (CMW_CAMERA_SetGain(gain) != CMW_ERROR_NONE)
     return ISP_ERR_SENSORGAIN;
 
@@ -953,6 +954,7 @@ static ISP_StatusTypeDef CB_ISP_SetSensorGain(uint32_t camera_instance, int32_t 
 
 static ISP_StatusTypeDef CB_ISP_GetSensorGain(uint32_t camera_instance, int32_t *gain)
 {
+  UNUSED(camera_instance);
   if (CMW_CAMERA_GetGain(gain) != CMW_ERROR_NONE)
     return ISP_ERR_SENSORGAIN;
 
@@ -961,6 +963,7 @@ static ISP_StatusTypeDef CB_ISP_GetSensorGain(uint32_t camera_instance, int32_t 
 
 static ISP_StatusTypeDef CB_ISP_SetSensorExposure(uint32_t camera_instance, int32_t exposure)
 {
+  UNUSED(camera_instance);
   if (CMW_CAMERA_SetExposure(exposure) != CMW_ERROR_NONE)
     return ISP_ERR_SENSOREXPOSURE;
 
@@ -969,6 +972,7 @@ static ISP_StatusTypeDef CB_ISP_SetSensorExposure(uint32_t camera_instance, int3
 
 static ISP_StatusTypeDef CB_ISP_GetSensorExposure(uint32_t camera_instance, int32_t *exposure)
 {
+  UNUSED(camera_instance);
   if (CMW_CAMERA_GetExposure(exposure) != CMW_ERROR_NONE)
     return ISP_ERR_SENSOREXPOSURE;
 
@@ -977,6 +981,7 @@ static ISP_StatusTypeDef CB_ISP_GetSensorExposure(uint32_t camera_instance, int3
 
 static ISP_StatusTypeDef CB_ISP_GetSensorInfo(uint32_t camera_instance, ISP_SensorInfoTypeDef *Info)
 {
+  UNUSED(camera_instance);
   if(Camera_Drv.GetSensorInfo != NULL)
   {
     if (Camera_Drv.GetSensorInfo(&camera_bsp, Info) != CMW_ERROR_NONE)
