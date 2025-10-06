@@ -331,11 +331,11 @@ int32_t CMW_CAMERA_Init(CMW_CameraInit_t *initConf)
   {
     return CMW_ERROR_UNKNOWN_COMPONENT;
   }
-//  ret = CMW_CAMERA_SetMirrorFlip(CMW_MIRRORFLIP_FLIP);
-//  if (ret == CMW_ERROR_COMPONENT_FAILURE)
-//  {
-//    return CMW_ERROR_UNKNOWN_COMPONENT;
-//  }
+  ret = CMW_CAMERA_SetMirrorFlip(initConf->mirror_flip);
+  if (ret == CMW_ERROR_COMPONENT_FAILURE)
+  {
+    return CMW_ERROR_UNKNOWN_COMPONENT;
+  }
   /* Write back the initValue width and height that might be changed */
   initConf->width = initValues.width;
   initConf->height = initValues.height ;
