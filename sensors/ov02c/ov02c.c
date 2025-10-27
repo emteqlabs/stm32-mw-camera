@@ -704,21 +704,15 @@ static int32_t OV02C_GetExposureRange(OV02C_Object_t *pObj, uint32_t *min_us,
 	int32_t ret = OV02C_OK;
 
 	uint64_t pclk = pObj->Pclk;
-	uint16_t hts = 0, vts = 0;
-	// read HTS and VTS
+	uint16_t hts = 0;
+	// read HTS, to determine line time
 	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS, (uint8_t*) &hts, 2) != 0) {
 		ret = OV02C_ERROR;
 		goto exit_exp_range;
 	}
-	hts = SWAP_ENDIAN16(hts);
-	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts, 2) != 0) {
-		ret = OV02C_ERROR;
-		goto exit_exp_range;
-	}
-	vts = SWAP_ENDIAN16(vts);
 	uint32_t line_us = (hts * 1000000) / pclk;
 	*min_us = OV02C_EXPOSURE_MIN_LINES * line_us;
-	*max_us = (vts - 15) * line_us;
+	*max_us = (OV02C_EXPOSURE_MAX_LINES - OV02C_EXPOSURE_MAX_LINES_MARGIN) * line_us;
 	exit_exp_range: return ret;
 }
 
@@ -749,16 +743,30 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 	uint32_t lines = exposure_us / line_us;
 
 	/* Clamp to sensor limits */
-	if (lines < OV02C_EXPOSURE_MIN_LINES)
+	if (lines < OV02C_EXPOSURE_MIN_LINES) {
 		lines = OV02C_EXPOSURE_MIN_LINES;
-	if (lines + OV02C_EXPOSURE_MAX_LINES_MARGIN > vts)
-	{
-		lines = (vts >= OV02C_EXPOSURE_MAX_LINES_MARGIN)
-				? vts - OV02C_EXPOSURE_MAX_LINES_MARGIN
-				: OV02C_EXPOSURE_MIN_LINES;
 	}
 
-	// TODO maybe add hold functionality
+	/* Calculate new VTS value */
+	uint32_t vts_new = lines + OV02C_EXPOSURE_MAX_LINES_MARGIN;
+	if(vts_new < OV02C_EXPOSURE_DEFAULT_LINES) {
+		vts_new = OV02C_EXPOSURE_DEFAULT_LINES;
+	}
+	if(vts_new > OV02C_EXPOSURE_MAX_LINES) {
+		vts_new = OV02C_EXPOSURE_MAX_LINES;
+	}
+	if(vts_new != vts) {
+		uint16_t vts_reg = SWAP_ENDIAN16((uint16_t )vts_new);
+		if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts_reg, 2) != OV02C_OK) {
+			ret = OV02C_ERROR;
+			goto exit_exp;
+		}
+	}
+
+	/* reclamp lines */
+	if(lines + OV02C_EXPOSURE_MAX_LINES_MARGIN > vts_new) {
+		lines = vts_new - OV02C_EXPOSURE_MAX_LINES_MARGIN;
+	}
 
 	/* Write exposure lines (16-bit: 0x3501 = MSB, 0x3502 = LSB) */
 	uint16_t exp_val = SWAP_ENDIAN16((uint16_t )lines);
@@ -767,8 +775,7 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 		ret = OV02C_ERROR;
 		goto exit_exp;
 	}
-	exit_exp:
-	// TODO: maybe add hold functionality if possible
+exit_exp:
 	return ret;
 }
 
