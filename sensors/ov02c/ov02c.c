@@ -732,14 +732,18 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 		goto exit_exp;
 	}
 	hts = SWAP_ENDIAN16(hts);
-	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts,
-			2) != OV02C_OK) {
-		ret = OV02C_ERROR;
-		goto exit_exp;
-	}
-	vts = SWAP_ENDIAN16(vts);
+
+	if (hts == 0 || pObj->Pclk == 0) {
+        ret = OV02C_ERROR; // Avoid division by zero
+        goto exit_exp;
+    }
+
 	/* Calculate number of lines (rounded) */
 	uint32_t line_us = (hts * 1000000) / pObj->Pclk;
+	if (line_us == 0) {
+        ret = OV02C_ERROR; // Avoid division by zero
+        goto exit_exp;
+    }
 	uint32_t lines = exposure_us / line_us;
 
 	/* Clamp to sensor limits */
@@ -755,6 +759,14 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 	if(vts_new > OV02C_EXPOSURE_MAX_LINES) {
 		vts_new = OV02C_EXPOSURE_MAX_LINES;
 	}
+
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts,
+			2) != OV02C_OK) {
+		ret = OV02C_ERROR;
+		goto exit_exp;
+	}
+	vts = SWAP_ENDIAN16(vts);
+
 	if(vts_new != vts) {
 		uint16_t vts_reg = SWAP_ENDIAN16((uint16_t )vts_new);
 		if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts_reg, 2) != OV02C_OK) {
