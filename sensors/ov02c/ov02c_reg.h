@@ -24,10 +24,11 @@
 
 #define OV02C_EXPOSURE_MIN_LINES            (uint16_t)4       // min lines
 #define OV02C_EXPOSURE_MAX_LINES_MARGIN     (uint16_t)15      // margin for max exposure
-#define OV02C_EXPOSURE_MAX_LINES            (uint16_t)2328    // max lines
+#define OV02C_EXPOSURE_MAX_LINES            (uint16_t)0x0F8C  // max lines
+#define OV02C_EXPOSURE_DEFAULT_LINES        (uint16_t)1164    // default lines for exposure (VTS)
 
 #define OV02C_EXPOSURE_MIN                  46      // in us, 4 lines, 11.4 us per line (hts / pclk is single line)
-#define OV02C_EXPOSURE_MAX                  26334   // in us, 2310 lines, 11.4 us per line
+#define OV02C_EXPOSURE_MAX                  13270   // in us, 1164 lines (default VTS), 11.4 us per line
 
 #define OV02C_ANALOG_GAIN_MAX_LINEAR        15.500f  // analog gain linear max value
 #define OV02C_DIGITAL_GAIN_MAX_LINEAR       15.500f  // digital gain linear max value
@@ -37,6 +38,7 @@
 #define OV02C_ANALOG_GAIN_MAX_REG           0x0F80
 #define OV02C_DIGITAL_GAIN_MIN_REG          0x010000
 #define OV02C_DIGITAL_GAIN_MAX_REG          0x0FFFC0
+// analog gain is used up to 23805 dBm, rest is digital
 #define OV02C_GAIN_MIN                      0      // dBm
 #define OV02C_GAIN_MAX                      25000  // dBm, max is 47610, but we limit to 25000
 
