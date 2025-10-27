@@ -725,9 +725,8 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 	// PCLK = FPS * HTS * VTS
 	uint16_t hts = 0, vts = 0;
 
-	// read HTS and VTS
-	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS, (uint8_t*) &hts,
-			2) != OV02C_OK) {
+	// read HTS
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_HTS, (uint8_t*) &hts, 2) != OV02C_OK) {
 		ret = OV02C_ERROR;
 		goto exit_exp;
 	}
@@ -753,15 +752,15 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 
 	/* Calculate new VTS value */
 	uint32_t vts_new = lines + OV02C_EXPOSURE_MAX_LINES_MARGIN;
-	if(vts_new < OV02C_EXPOSURE_DEFAULT_LINES) {
-		vts_new = OV02C_EXPOSURE_DEFAULT_LINES;
+	if(vts_new < OV02C_EXPOSURE_MIN_LINES) {
+		vts_new = OV02C_EXPOSURE_MIN_LINES;
 	}
 	if(vts_new > OV02C_EXPOSURE_MAX_LINES) {
 		vts_new = OV02C_EXPOSURE_MAX_LINES;
 	}
 
-	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts,
-			2) != OV02C_OK) {
+	/* read current VTS and update with new if different */
+	if (ov02c_read_reg(&pObj->Ctx, OV02C_REG_VTS, (uint8_t*) &vts, 2) != OV02C_OK) {
 		ret = OV02C_ERROR;
 		goto exit_exp;
 	}
