@@ -22,13 +22,12 @@
 #define OV02C_REG_ANALOG_GAIN               0x3508  // Analog gain register (16-bit, upper bits used)
 #define OV02C_REG_DIGITAL_GAIN              0x350A  // Digital gain register (24-bit)
 
-#define OV02C_EXPOSURE_MIN_LINES            (uint16_t)4       // min lines
+#define OV02C_EXPOSURE_MIN_LINES            (uint16_t)0x048C  // min lines
 #define OV02C_EXPOSURE_MAX_LINES_MARGIN     (uint16_t)15      // margin for max exposure
 #define OV02C_EXPOSURE_MAX_LINES            (uint16_t)0x0F8C  // max lines
-#define OV02C_EXPOSURE_DEFAULT_LINES        (uint16_t)1164    // default lines for exposure (VTS)
 
-#define OV02C_EXPOSURE_MIN                  46      // in us, 4 lines, 11.4 us per line (hts / pclk is single line)
-#define OV02C_EXPOSURE_MAX                  13270   // in us, 1164 lines (default VTS), 11.4 us per line
+#define OV02C_EXPOSURE_MIN                  13270   // in us, 4 lines, 11.4 us per line (hts / pclk is single line)
+#define OV02C_EXPOSURE_MAX                  45372   // in us, 1164 lines (default VTS), 11.4 us per line
 
 #define OV02C_ANALOG_GAIN_MAX_LINEAR        15.500f  // analog gain linear max value
 #define OV02C_DIGITAL_GAIN_MAX_LINEAR       15.500f  // digital gain linear max value
