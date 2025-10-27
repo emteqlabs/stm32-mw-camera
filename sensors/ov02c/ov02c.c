@@ -710,6 +710,7 @@ static int32_t OV02C_GetExposureRange(OV02C_Object_t *pObj, uint32_t *min_us,
 		ret = OV02C_ERROR;
 		goto exit_exp_range;
 	}
+	hts = SWAP_ENDIAN16(hts);
 	uint32_t line_us = (hts * 1000000) / pclk;
 	*min_us = OV02C_EXPOSURE_MIN_LINES * line_us;
 	*max_us = (OV02C_EXPOSURE_MAX_LINES - OV02C_EXPOSURE_MAX_LINES_MARGIN) * line_us;
