@@ -38,7 +38,7 @@
 #define OV02C_DIGITAL_GAIN_MIN_REG          0x010000
 #define OV02C_DIGITAL_GAIN_MAX_REG          0x0FFFC0
 #define OV02C_GAIN_MIN                      0      // dBm
-#define OV02C_GAIN_MAX                      47610  // dBm
+#define OV02C_GAIN_MAX                      25000  // dBm, max is 47610, but we limit to 25000
 
 #define OV02C_REG_HTS                       0x380C
 #define OV02C_REG_HTS_MSB                   0x380C
