@@ -39,7 +39,7 @@
 #define OV02C_DIGITAL_GAIN_MAX_REG          0x0FFFC0
 // analog gain is used up to 23805 dBm, rest is digital
 #define OV02C_GAIN_MIN                      0      // dBm
-#define OV02C_GAIN_MAX                      25000  // dBm, max is 47610, but we limit to 25000
+#define OV02C_GAIN_MAX                      35000  // dBm
 
 #define OV02C_REG_HTS                       0x380C
 #define OV02C_REG_HTS_MSB                   0x380C
