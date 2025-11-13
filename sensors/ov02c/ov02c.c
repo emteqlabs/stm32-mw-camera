@@ -713,7 +713,7 @@ static int32_t OV02C_GetExposureRange(OV02C_Object_t *pObj, uint32_t *min_us,
 	hts = SWAP_ENDIAN16(hts);
 	uint32_t line_us = (hts * 1000000) / pclk;
 	*min_us = OV02C_EXPOSURE_MIN_LINES * line_us;
-	*max_us = (OV02C_EXPOSURE_MAX_LINES - OV02C_EXPOSURE_MAX_LINES_MARGIN) * line_us;
+	*max_us = (OV02C_EXPOSURE_MAX_VTS - OV02C_EXPOSURE_MAX_LINES_MARGIN) * line_us;
 	exit_exp_range: return ret;
 }
 
@@ -753,11 +753,11 @@ int32_t OV02C_SetExposure(OV02C_Object_t *pObj, int32_t exposure_us) {
 
 	/* Calculate new VTS value */
 	uint32_t vts_new = lines + OV02C_EXPOSURE_MAX_LINES_MARGIN;
-	if(vts_new < OV02C_EXPOSURE_MIN_LINES) {
-		vts_new = OV02C_EXPOSURE_MIN_LINES;
+	if(vts_new < OV02C_EXPOSURE_MIN_VTS) {
+		vts_new = OV02C_EXPOSURE_MIN_VTS;
 	}
-	if(vts_new > OV02C_EXPOSURE_MAX_LINES) {
-		vts_new = OV02C_EXPOSURE_MAX_LINES;
+	if(vts_new > OV02C_EXPOSURE_MAX_VTS) {
+		vts_new = OV02C_EXPOSURE_MAX_VTS;
 	}
 
 	/* read current VTS and update with new if different */
@@ -834,3 +834,4 @@ int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config) 
 	}
 	exit_mirrorflip: return ret;
 }
+
