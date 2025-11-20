@@ -20,6 +20,10 @@ static int CMW_OV02C_GetResType(uint32_t width, uint32_t height, uint32_t*res)
   {
     *res = OV02C_RESOLUTION_1928_1082;
   }
+  else if(width == 960 && height == 540)
+  {
+    *res = OV02C_RESOLUTION_960_540;
+  }
   else
   {
     return CMW_ERROR_WRONG_PARAM;

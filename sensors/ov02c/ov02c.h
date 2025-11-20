@@ -108,6 +108,7 @@ typedef struct
 
 // resolutions
 #define OV02C_RESOLUTION_1928_1082	1
+#define OV02C_RESOLUTION_960_540    2
 
 // formats
 #define OV02C_RAW_GRBG10 1
