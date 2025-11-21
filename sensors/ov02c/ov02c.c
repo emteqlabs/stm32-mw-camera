@@ -1036,6 +1036,7 @@ exit_exp:
 int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config) {
 	int32_t ret = OV02C_OK;
 	uint8_t tmp;
+	uint8_t reg_val;
 
 	uint16_t shift_x = 0x0003, shift_y = 0x0003;
 
@@ -1058,7 +1059,14 @@ int32_t OV02C_MirrorFlipConfig(OV02C_Object_t *pObj, OV02C_MirrorFlip_t Config) 
 		tmp = 0xa8;
 		break;
 	}
-	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_FORMAT, &tmp, 1) != OV02C_OK) {
+
+	// read the register first to preserve other bits
+	if( ov02c_read_reg(&pObj->Ctx, OV02C_REG_FORMAT, &reg_val, 1) != OV02C_OK) {
+		ret = OV02C_ERROR;
+		goto exit_mirrorflip;
+	}
+	reg_val |= tmp;
+	if (ov02c_write_reg(&pObj->Ctx, OV02C_REG_FORMAT, &reg_val, 1) != OV02C_OK) {
 		ret = OV02C_ERROR;
 		goto exit_mirrorflip;
 	}
