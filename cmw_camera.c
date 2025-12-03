@@ -879,7 +879,6 @@ static void CMW_CAMERA_EnableGPIOs(void)
   NRST_CAM_GPIO_CLK_ENABLE();
   XSHUTDN_CAM_GPIO_ENABLE_VDDIO();
   XSHUTDN_CAM_GPIO_CLK_ENABLE();
-  XSHUTDN_CAM_GPIO_CLK_ENABLE();
 
   gpio_init_structure.Pin       = EN_CAM_PIN;
   gpio_init_structure.Pull      = GPIO_NOPULL;
