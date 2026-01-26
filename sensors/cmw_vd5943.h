@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    cmw_vd55g1.h
+  * @file    cmw_vd5943.h
   * @author  MDG Application Team
   ******************************************************************************
   * @attention
@@ -15,8 +15,8 @@
   ******************************************************************************
   */
 
-#ifndef CMW_VD55G1
-#define CMW_VD55G1
+#ifndef CMW_VD5943_H
+#define CMW_VD5943_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -25,15 +25,21 @@
 #include <stdint.h>
 #include "cmw_sensors_if.h"
 #include "cmw_errno.h"
-#include "vd55g1.h"
+#include "vd1943.h"
+#include "stm32n6xx_hal_dcmipp.h"
+#include "isp_api.h"
 #include "cmw_camera.h"
 
-#define VD55G1_NAME    "VD55G1"
+#define VD5943_CUT1_3_CHIP_ID   0x53393430
+#define VD5943_CUT1_4_CHIP_ID   0x53393431
 
 typedef struct
 {
   uint16_t Address;
-  VD55G1_Ctx_t ctx_driver;
+  VD1943_Ctx_t  ctx_driver;
+  ISP_HandleTypeDef hIsp;
+  ISP_AppliHelpersTypeDef appliHelpers;
+  DCMIPP_HandleTypeDef *hdcmipp;
   uint8_t IsInitialized;
   int32_t (*Init)(void);
   int32_t (*DeInit)(void);
@@ -43,11 +49,10 @@ typedef struct
   void (*Delay)(uint32_t delay_in_ms);
   void (*ShutdownPin)(int value);
   void (*EnablePin)(int value);
-} CMW_VD55G1_t;
+} CMW_VD5943_t;
 
-int CMW_VD55G1_Probe(CMW_VD55G1_t *io_ctx, CMW_Sensor_if_t *vd55g1_if);
-void CMW_VD55G1_SetDefaultSensorValues(CMW_VD55G1_config_t *vd55g1_config);
-
+int CMW_VD5943_Probe(CMW_VD5943_t *io_ctx, CMW_Sensor_if_t *vd5943_if);
+void CMW_VD5943_SetDefaultSensorValues(CMW_VD5943_config_t *vd5943_config);
 
 #ifdef __cplusplus
 }

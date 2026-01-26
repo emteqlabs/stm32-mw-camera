@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    cmw_vd55g1.h
+  * @file    cmw_ov5640.h
   * @author  MDG Application Team
   ******************************************************************************
   * @attention
@@ -15,8 +15,8 @@
   ******************************************************************************
   */
 
-#ifndef CMW_VD55G1
-#define CMW_VD55G1
+#ifndef CMW_OV5640
+#define CMW_OV5640
 
 #ifdef __cplusplus
  extern "C" {
@@ -25,15 +25,14 @@
 #include <stdint.h>
 #include "cmw_sensors_if.h"
 #include "cmw_errno.h"
-#include "vd55g1.h"
+#include "ov5640.h"
 #include "cmw_camera.h"
-
-#define VD55G1_NAME    "VD55G1"
 
 typedef struct
 {
   uint16_t Address;
-  VD55G1_Ctx_t ctx_driver;
+  uint32_t ClockInHz;
+  OV5640_Object_t ctx_driver;
   uint8_t IsInitialized;
   int32_t (*Init)(void);
   int32_t (*DeInit)(void);
@@ -43,11 +42,10 @@ typedef struct
   void (*Delay)(uint32_t delay_in_ms);
   void (*ShutdownPin)(int value);
   void (*EnablePin)(int value);
-} CMW_VD55G1_t;
+} CMW_OV5640_t;
 
-int CMW_VD55G1_Probe(CMW_VD55G1_t *io_ctx, CMW_Sensor_if_t *vd55g1_if);
-void CMW_VD55G1_SetDefaultSensorValues(CMW_VD55G1_config_t *vd55g1_config);
-
+int CMW_OV5640_Probe(CMW_OV5640_t *io_ctx, CMW_Sensor_if_t *vd55g1_if);
+void CMW_OV5640_SetDefaultSensorValues(CMW_OV5640_config_t *ov5640_config);
 
 #ifdef __cplusplus
 }
