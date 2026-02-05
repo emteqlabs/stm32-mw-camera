@@ -176,6 +176,12 @@ static int32_t CMW_OV02C_Init(void *io_ctx, CMW_Sensor_Init_t *initSensor)
 {
   int ret = CMW_ERROR_NONE;
   uint32_t resolution;
+  CMW_OV02C_config_t *sensor_config;
+  sensor_config = (CMW_OV02C_config_t*)(initSensor->sensor_config);
+  if (sensor_config == NULL)
+  {
+    return CMW_ERROR_WRONG_PARAM;
+  }
 
   ret = CMW_OV02C_GetResType(initSensor->width, initSensor->height, &resolution);
   if (ret)
@@ -183,7 +189,7 @@ static int32_t CMW_OV02C_Init(void *io_ctx, CMW_Sensor_Init_t *initSensor)
     return CMW_ERROR_WRONG_PARAM;
   }
 
-  ret = OV02C_Init(&((CMW_OV02C_t *)io_ctx)->ctx_driver, resolution, initSensor->pixel_format);
+  ret = OV02C_Init(&((CMW_OV02C_t *)io_ctx)->ctx_driver, resolution, sensor_config->pixel_format);
   if (ret != OV02C_OK)
   {
     return CMW_ERROR_COMPONENT_FAILURE;
