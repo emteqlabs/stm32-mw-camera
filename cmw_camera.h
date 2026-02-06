@@ -62,14 +62,11 @@ typedef enum {
   CMW_IMX335_Sensor,
   CMW_OV5640_Sensor,
   CMW_VD55G1_Sensor,
-<<<<<<< HEAD
   CMW_OV02C_Sensor,
-  CMW_OV2740_Sensor
-=======
+  CMW_OV2740_Sensor,
   CMW_VD65G4_Sensor,
   CMW_VD1943_Sensor,
   CMW_VD5943_Sensor
->>>>>>> upstream/main
 } CMW_Sensor_Name_t;
 
 typedef struct
@@ -89,6 +86,16 @@ typedef struct
   uint32_t pixel_format; /*!< This parameter can be a value from @ref CMW_PIXEL_FORMAT */
   uint32_t CSI_PHYBitrate;
 } CMW_VD55G1_config_t;
+
+typedef struct
+{
+  uint32_t pixel_format; /*!< This parameter can be a value from @ref CMW_PIXEL_FORMAT */
+} CMW_OV02C_config_t;
+
+typedef struct
+{
+  uint32_t pixel_format; /*!< This parameter can be a value from @ref CMW_PIXEL_FORMAT */
+} CMW_OV2740_config_t;
 
 typedef struct
 {
