@@ -1942,6 +1942,7 @@ static int32_t CMW_CAMERA_IMX335_Init(CMW_Sensor_Init_t *initSensors_params)
   initSensors_params->sensor_config = initSensors_params->sensor_config ? initSensors_params->sensor_config : &default_sensor_config;
   sensor_config = (CMW_IMX335_config_t*) (initSensors_params->sensor_config);
 
+  uint32_t dt_format = 0;
   ret = Camera_Drv.Init(&camera_bsp, initSensors_params);
   if (ret != CMW_ERROR_NONE)
   {
@@ -2012,6 +2013,10 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
   int32_t ret = CMW_ERROR_NONE;
   DCMIPP_CSI_ConfTypeDef csi_conf = { 0 };
   DCMIPP_CSI_PIPE_ConfTypeDef csi_pipe_conf = { 0 };
+  uint32_t dt_format = 0;
+  uint32_t dt = 0;
+  CMW_OV02C_config_t default_sensor_config;
+  CMW_OV02C_config_t *sensor_config;
 
   memset(&camera_bsp, 0, sizeof(camera_bsp));
   camera_bsp.ov02c_bsp.Address     = CAMERA_OV02C_ADDRESS;
@@ -2090,6 +2095,10 @@ static int32_t CMW_CAMERA_OV2740_Init(CMW_Sensor_Init_t *initSensors_params)
   int32_t ret = CMW_ERROR_NONE;
   DCMIPP_CSI_ConfTypeDef csi_conf = { 0 };
   DCMIPP_CSI_PIPE_ConfTypeDef csi_pipe_conf = { 0 };
+  uint32_t dt_format = 0;
+  uint32_t dt = 0;
+  CMW_OV2740_config_t default_sensor_config;
+  CMW_OV2740_config_t *sensor_config;
 
   memset(&camera_bsp, 0, sizeof(camera_bsp));
   camera_bsp.ov2740_bsp.Address     = CAMERA_OV2740_ADDRESS;
