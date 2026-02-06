@@ -119,6 +119,16 @@ typedef struct {
 } CMW_OV5640_config_t;
 
 typedef struct {
+  uint32_t pixel_format; /*!< This parameter can be a value from @ref
+                            CMW_PIXEL_FORMAT */
+} CMW_OV02C_config_t;
+
+typedef struct {
+  uint32_t pixel_format; /*!< This parameter can be a value from @ref
+                            CMW_PIXEL_FORMAT */
+} CMW_OV2740_config_t;
+
+typedef struct {
   CMW_Sensor_Name_t selected_sensor;
   union {
     CMW_IMX335_config_t imx335_config;
@@ -129,6 +139,8 @@ typedef struct {
     CMW_VD1943_config_t vd1943_config;
     CMW_VD5943_config_t vd5943_config;
     CMW_OV5640_config_t ov5640_config;
+    CMW_OV02C_config_t ov02c_config;
+    CMW_OV2740_config_t ov2740_config;
   } config_sensor;
 } CMW_Advanced_Config_t;
 
