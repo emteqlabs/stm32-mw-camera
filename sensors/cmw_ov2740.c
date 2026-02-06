@@ -176,6 +176,8 @@ static int32_t CMW_OV2740_Init(void *io_ctx, CMW_Sensor_Init_t *initSensor)
 {
   int ret = CMW_ERROR_NONE;
   uint32_t resolution;
+  CMW_OV2740_config_t *sensor_config;
+  sensor_config = (CMW_OV2740_config_t*)(initSensor->sensor_config);
 
   ret = CMW_OV2740_GetResType(initSensor->width, initSensor->height, &resolution);
   if (ret)
@@ -183,7 +185,7 @@ static int32_t CMW_OV2740_Init(void *io_ctx, CMW_Sensor_Init_t *initSensor)
     return CMW_ERROR_WRONG_PARAM;
   }
 
-  ret = OV2740_Init(&((CMW_OV2740_t *)io_ctx)->ctx_driver, resolution, initSensor->pixel_format);
+  ret = OV2740_Init(&((CMW_OV2740_t *)io_ctx)->ctx_driver, resolution, sensor_config->pixel_format);
   if (ret != OV2740_OK)
   {
     return CMW_ERROR_COMPONENT_FAILURE;
