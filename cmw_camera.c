@@ -142,6 +142,7 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initValues);
 #endif
 #if defined(USE_OV2740_SENSOR)
 static int32_t CMW_CAMERA_OV2740_Init(CMW_Sensor_Init_t *initValues);
+#endif
 #if defined(USE_VD56G3_SENSOR)
 static int32_t CMW_CAMERA_VD56G3_Init(CMW_Sensor_Init_t *initSensors_params);
 #endif
