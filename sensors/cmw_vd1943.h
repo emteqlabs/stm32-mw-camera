@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    cmw_vd66gy.h
+  * @file    cmw_vd1943.h
   * @author  MDG Application Team
   ******************************************************************************
   * @attention
@@ -15,8 +15,8 @@
   ******************************************************************************
   */
 
-#ifndef CMW_VD6G
-#define CMW_VD6G
+#ifndef CMW_VD1943_H
+#define CMW_VD1943_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -25,18 +25,19 @@
 #include <stdint.h>
 #include "cmw_sensors_if.h"
 #include "cmw_errno.h"
-#include "vd6g.h"
+#include "vd1943.h"
 #include "stm32n6xx_hal_dcmipp.h"
-#include "isp_api.h"
 #include "cmw_camera.h"
+#include "isp_api.h"
 
-#define VD66GY_CHIP_ID 0x5603
-#define VD66GY_NAME    "VD66GY"
+#define VD1943_CUT1_3_CHIP_ID   0x53393430
+#define VD1943_CUT1_4_CHIP_ID   0x53393431
+#define VD1943_NAME             "VD1943"
 
 typedef struct
 {
   uint16_t Address;
-  VD6G_Ctx_t ctx_driver;
+  VD1943_Ctx_t  ctx_driver;
   ISP_HandleTypeDef hIsp;
   ISP_AppliHelpersTypeDef appliHelpers;
   DCMIPP_HandleTypeDef *hdcmipp;
@@ -49,10 +50,10 @@ typedef struct
   void (*Delay)(uint32_t delay_in_ms);
   void (*ShutdownPin)(int value);
   void (*EnablePin)(int value);
-} CMW_VD66GY_t;
+} CMW_VD1943_t;
 
-int CMW_VD66GY_Probe(CMW_VD66GY_t *io_ctx, CMW_Sensor_if_t *vd6g_if);
-void CMW_VD66GY_SetDefaultSensorValues(CMW_VD66GY_config_t *vd66gy_config);
+int CMW_VD1943_Probe(CMW_VD1943_t *io_ctx, CMW_Sensor_if_t *vd1943_if);
+void CMW_VD1943_SetDefaultSensorValues(CMW_VD1943_config_t *vd1943_config);
 
 #ifdef __cplusplus
 }
