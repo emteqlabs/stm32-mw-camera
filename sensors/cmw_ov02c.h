@@ -10,6 +10,7 @@
 #include "cmw_errno.h"
 #include "ov02c.h"
 #include "isp_api.h"
+#include "cmw_camera.h"
 
 typedef struct
 {
@@ -31,6 +32,7 @@ typedef struct
 } CMW_OV02C_t;
 
 int CMW_OV02C_Probe(CMW_OV02C_t *io_ctx, CMW_Sensor_if_t *ov02c_if);
+void CMW_OV02C_SetDefaultSensorValues(CMW_OV02C_config_t *ov02c_config);
 
 #ifdef __cplusplus
 }

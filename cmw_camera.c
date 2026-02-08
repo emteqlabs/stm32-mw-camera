@@ -2014,6 +2014,10 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
   int32_t ret = CMW_ERROR_NONE;
   DCMIPP_CSI_ConfTypeDef csi_conf = { 0 };
   DCMIPP_CSI_PIPE_ConfTypeDef csi_pipe_conf = { 0 };
+  uint32_t dt_format = 0;
+  uint32_t dt = 0;
+  CMW_OV02C_config_t default_sensor_config;
+  CMW_OV02C_config_t *sensor_config;
 
   memset(&camera_bsp, 0, sizeof(camera_bsp));
   camera_bsp.ov02c_bsp.Address     = CAMERA_OV02C_ADDRESS;
@@ -2047,6 +2051,10 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
     initSensors_params->height = sensor_info.height;
   }
 
+  CMW_OV02C_SetDefaultSensorValues(&default_sensor_config);
+  initSensors_params->sensor_config = initSensors_params->sensor_config ? initSensors_params->sensor_config : &default_sensor_config;
+  sensor_config = (CMW_OV02C_config_t*) (initSensors_params->sensor_config);
+
   ret = Camera_Drv.Init(&camera_bsp, initSensors_params);
   if (ret != CMW_ERROR_NONE)
   {
@@ -2062,14 +2070,33 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
     return CMW_ERROR_PERIPH_FAILURE;
   }
 
-  ret = HAL_DCMIPP_CSI_SetVCConfig(&hcamera_dcmipp, DCMIPP_VIRTUAL_CHANNEL0, DCMIPP_CSI_DT_BPP10);
+  switch (sensor_config->pixel_format)
+  {
+    case CMW_PIXEL_FORMAT_RAW8:
+    {
+      dt_format = DCMIPP_CSI_DT_BPP8;
+      dt = DCMIPP_DT_RAW8;
+      break;
+    }
+    case CMW_PIXEL_FORMAT_RAW10:
+    case CMW_PIXEL_FORMAT_DEFAULT:
+    {
+      dt_format = DCMIPP_CSI_DT_BPP10;
+      dt = DCMIPP_DT_RAW10;
+      break;
+    }
+    default:
+      return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
+  ret = HAL_DCMIPP_CSI_SetVCConfig(&hcamera_dcmipp, DCMIPP_VIRTUAL_CHANNEL0, dt_format);
   if (ret != HAL_OK)
   {
     return CMW_ERROR_PERIPH_FAILURE;
   }
 
   csi_pipe_conf.DataTypeMode = DCMIPP_DTMODE_DTIDA;
-  csi_pipe_conf.DataTypeIDA = DCMIPP_DT_RAW10;
+  csi_pipe_conf.DataTypeIDA = dt;
   csi_pipe_conf.DataTypeIDB = 0;
   /* Pre-initialize CSI config for all the pipes */
   for (uint32_t i = DCMIPP_PIPE0; i <= DCMIPP_PIPE2; i++)
@@ -2080,9 +2107,7 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
       return CMW_ERROR_PERIPH_FAILURE;
     }
   }
-
-
-  return ret;
+  return CMW_ERROR_NONE;
 }
 #endif
 
@@ -2092,6 +2117,7 @@ static int32_t CMW_CAMERA_OV2740_Init(CMW_Sensor_Init_t *initSensors_params)
   int32_t ret = CMW_ERROR_NONE;
   DCMIPP_CSI_ConfTypeDef csi_conf = { 0 };
   DCMIPP_CSI_PIPE_ConfTypeDef csi_pipe_conf = { 0 };
+
 
   memset(&camera_bsp, 0, sizeof(camera_bsp));
   camera_bsp.ov2740_bsp.Address     = CAMERA_OV2740_ADDRESS;

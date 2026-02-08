@@ -321,3 +321,10 @@ int CMW_OV02C_Probe(CMW_OV02C_t *io_ctx, CMW_Sensor_if_t *ov02c_if)
   return ret;
 }
 
+void CMW_OV02C_SetDefaultSensorValues(CMW_OV02C_config_t *ov02c_config)
+{
+  if (ov02c_config != NULL)
+  {
+    ov02c_config->pixel_format = CMW_PIXEL_FORMAT_RAW10;
+  }
+}
