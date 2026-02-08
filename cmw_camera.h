@@ -135,6 +135,8 @@ typedef struct
     CMW_VD56G3_config_t vd56g3_config;
     CMW_VD55G1_config_t vd55g1_config;
     CMW_VD65G4_config_t vd65g4_config;
+    CMW_OV02C_config_t ov02c_config;
+    CMW_OV2740_config_t ov2740_config;
     CMW_VD1943_config_t vd1943_config;
     CMW_VD5943_config_t vd5943_config;
     CMW_OV5640_config_t ov5640_config;

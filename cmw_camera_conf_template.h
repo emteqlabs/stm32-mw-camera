@@ -47,6 +47,7 @@ extern "C" {
 #define USE_OV5640_SENSOR
 #define USE_VD55G1_SENSOR
 #define USE_OV02C_SENSOR
+#define USE_OV2740_SENSOR
 #define USE_VD65G4_SENSOR
 #define USE_VD1943_SENSOR
 

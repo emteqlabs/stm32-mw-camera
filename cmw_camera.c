@@ -2042,6 +2042,11 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
     return CMW_ERROR_COMPONENT_FAILURE;
   }
 
+  if ((connected_sensor != CMW_OV02C_Sensor) && (connected_sensor != CMW_UNKNOWN_Sensor))
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
   /* Special case: when resolution is not specified take the full sensor resolution */
   if ((initSensors_params->width == 0) || (initSensors_params->height == 0))
   {
@@ -2059,15 +2064,6 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
   if (ret != CMW_ERROR_NONE)
   {
     return CMW_ERROR_COMPONENT_FAILURE;
-  }
-
-  csi_conf.NumberOfLanes = DCMIPP_CSI_TWO_DATA_LANES;
-  csi_conf.DataLaneMapping = DCMIPP_CSI_PHYSICAL_DATA_LANES;
-  csi_conf.PHYBitrate = DCMIPP_CSI_PHY_BT_800;
-  ret = HAL_DCMIPP_CSI_SetConfig(&hcamera_dcmipp, &csi_conf);
-  if (ret != HAL_OK)
-  {
-    return CMW_ERROR_PERIPH_FAILURE;
   }
 
   switch (sensor_config->pixel_format)
@@ -2089,6 +2085,15 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
       return CMW_ERROR_COMPONENT_FAILURE;
   }
 
+  csi_conf.NumberOfLanes = DCMIPP_CSI_TWO_DATA_LANES;
+  csi_conf.DataLaneMapping = DCMIPP_CSI_PHYSICAL_DATA_LANES;
+  csi_conf.PHYBitrate = DCMIPP_CSI_PHY_BT_800;
+  ret = HAL_DCMIPP_CSI_SetConfig(&hcamera_dcmipp, &csi_conf);
+  if (ret != HAL_OK)
+  {
+    return CMW_ERROR_PERIPH_FAILURE;
+  }
+
   ret = HAL_DCMIPP_CSI_SetVCConfig(&hcamera_dcmipp, DCMIPP_VIRTUAL_CHANNEL0, dt_format);
   if (ret != HAL_OK)
   {
@@ -2107,7 +2112,7 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
       return CMW_ERROR_PERIPH_FAILURE;
     }
   }
-  return CMW_ERROR_NONE;
+  return ret;
 }
 #endif
 
@@ -2407,6 +2412,11 @@ int32_t CMW_CAMERA_SetDefaultSensorValues( CMW_Advanced_Config_t *advanced_confi
 #if defined(USE_VD55G1_SENSOR)
   case CMW_VD55G1_Sensor:
     CMW_VD55G1_SetDefaultSensorValues(&advanced_config->config_sensor.vd55g1_config);
+    break;
+#endif
+#if defined(USE_OV02C_SENSOR)
+  case CMW_OV02C_Sensor:
+    CMW_OV02C_SetDefaultSensorValues(&advanced_config->config_sensor.ov02c_config);
     break;
 #endif
 #if defined(USE_VD65G4_SENSOR)
