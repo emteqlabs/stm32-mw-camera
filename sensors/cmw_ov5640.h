@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    cmw_vd66gy.h
+  * @file    cmw_ov5640.h
   * @author  MDG Application Team
   ******************************************************************************
   * @attention
@@ -15,8 +15,8 @@
   ******************************************************************************
   */
 
-#ifndef CMW_VD6G
-#define CMW_VD6G
+#ifndef CMW_OV5640
+#define CMW_OV5640
 
 #ifdef __cplusplus
  extern "C" {
@@ -25,21 +25,14 @@
 #include <stdint.h>
 #include "cmw_sensors_if.h"
 #include "cmw_errno.h"
-#include "vd6g.h"
-#include "stm32n6xx_hal_dcmipp.h"
-#include "isp_api.h"
+#include "ov5640.h"
 #include "cmw_camera.h"
-
-#define VD66GY_CHIP_ID 0x5603
-#define VD66GY_NAME    "VD66GY"
 
 typedef struct
 {
   uint16_t Address;
-  VD6G_Ctx_t ctx_driver;
-  ISP_HandleTypeDef hIsp;
-  ISP_AppliHelpersTypeDef appliHelpers;
-  DCMIPP_HandleTypeDef *hdcmipp;
+  uint32_t ClockInHz;
+  OV5640_Object_t ctx_driver;
   uint8_t IsInitialized;
   int32_t (*Init)(void);
   int32_t (*DeInit)(void);
@@ -49,10 +42,10 @@ typedef struct
   void (*Delay)(uint32_t delay_in_ms);
   void (*ShutdownPin)(int value);
   void (*EnablePin)(int value);
-} CMW_VD66GY_t;
+} CMW_OV5640_t;
 
-int CMW_VD66GY_Probe(CMW_VD66GY_t *io_ctx, CMW_Sensor_if_t *vd6g_if);
-void CMW_VD66GY_SetDefaultSensorValues(CMW_VD66GY_config_t *vd66gy_config);
+int CMW_OV5640_Probe(CMW_OV5640_t *io_ctx, CMW_Sensor_if_t *vd55g1_if);
+void CMW_OV5640_SetDefaultSensorValues(CMW_OV5640_config_t *ov5640_config);
 
 #ifdef __cplusplus
 }
