@@ -63,6 +63,7 @@ typedef enum {
   CMW_OV5640_Sensor,
   CMW_VD55G1_Sensor,
   CMW_OV02C_Sensor,
+  CMW_OV05C10_Sensor,
   CMW_OV2740_Sensor,
   CMW_VD65G4_Sensor,
   CMW_VD1943_Sensor,
@@ -136,6 +137,7 @@ typedef struct
     CMW_VD55G1_config_t vd55g1_config;
     CMW_VD65G4_config_t vd65g4_config;
     CMW_OV02C_config_t ov02c_config;
+    CMW_OV05C10_config_t ov05c10_config;
     CMW_OV2740_config_t ov2740_config;
     CMW_VD1943_config_t vd1943_config;
     CMW_VD5943_config_t vd5943_config;

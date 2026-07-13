@@ -42,6 +42,9 @@
 #if defined(USE_OV02C_SENSOR)
 #include "cmw_ov02c.h"
 #endif
+#if defined(USE_OV05C10_SENSOR)
+#include "cmw_ov05c10.h"
+#endif
 #if defined(USE_OV2740_SENSOR)
 #include "cmw_ov2740.h"
 #endif
