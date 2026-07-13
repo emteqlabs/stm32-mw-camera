@@ -96,6 +96,11 @@ typedef struct
 typedef struct
 {
   uint32_t pixel_format; /*!< This parameter can be a value from @ref CMW_PIXEL_FORMAT */
+} CMW_OV05C10_config_t;
+
+typedef struct
+{
+  uint32_t pixel_format; /*!< This parameter can be a value from @ref CMW_PIXEL_FORMAT */
 } CMW_OV2740_config_t;
 
 typedef struct
