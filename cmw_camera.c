@@ -143,6 +143,9 @@ static int32_t CMW_CAMERA_VD66GY_Init(CMW_Sensor_Init_t *initValues);
 #if defined(USE_OV02C_SENSOR)
 static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initValues);
 #endif
+#if defined(USE_OV05C10_SENSOR)
+static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initValues);
+#endif
 #if defined(USE_OV2740_SENSOR)
 static int32_t CMW_CAMERA_OV2740_Init(CMW_Sensor_Init_t *initValues);
 #endif
@@ -2115,6 +2118,112 @@ static int32_t CMW_CAMERA_OV02C_Init(CMW_Sensor_Init_t *initSensors_params)
   csi_pipe_conf.DataTypeIDA = dt;
   csi_pipe_conf.DataTypeIDB = 0;
   /* Pre-initialize CSI config for all the pipes */
+  for (uint32_t i = DCMIPP_PIPE0; i <= DCMIPP_PIPE2; i++)
+  {
+    ret = HAL_DCMIPP_CSI_PIPE_SetConfig(&hcamera_dcmipp, i, &csi_pipe_conf);
+    if (ret != HAL_OK)
+    {
+      return CMW_ERROR_PERIPH_FAILURE;
+    }
+  }
+  return ret;
+}
+#endif
+
+#if defined(USE_OV05C10_SENSOR)
+static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initSensors_params)
+{
+  int32_t ret = CMW_ERROR_NONE;
+  DCMIPP_CSI_ConfTypeDef csi_conf = { 0 };
+  DCMIPP_CSI_PIPE_ConfTypeDef csi_pipe_conf = { 0 };
+  uint32_t dt_format = 0;
+  uint32_t dt = 0;
+  CMW_OV05C10_config_t default_sensor_config;
+  CMW_OV05C10_config_t *sensor_config;
+
+  memset(&camera_bsp, 0, sizeof(camera_bsp));
+  camera_bsp.ov05c10_bsp.Address     = CAMERA_OV05C10_ADDRESS;
+  camera_bsp.ov05c10_bsp.Init        = CMW_I2C_INIT;
+  camera_bsp.ov05c10_bsp.DeInit      = CMW_I2C_DEINIT;
+  camera_bsp.ov05c10_bsp.ReadReg     = CMW_I2C_READREG16;
+  camera_bsp.ov05c10_bsp.WriteReg    = CMW_I2C_WRITEREG16;
+  camera_bsp.ov05c10_bsp.GetTick     = BSP_GetTick;
+  camera_bsp.ov05c10_bsp.Delay       = HAL_Delay;
+  camera_bsp.ov05c10_bsp.ShutdownPin = CMW_CAMERA_ShutdownPin;
+  camera_bsp.ov05c10_bsp.EnablePin   = CMW_CAMERA_EnablePin;
+  camera_bsp.ov05c10_bsp.hdcmipp     = &hcamera_dcmipp;
+  camera_bsp.ov05c10_bsp.appliHelpers.SetSensorGain = CB_ISP_SetSensorGain;
+  camera_bsp.ov05c10_bsp.appliHelpers.GetSensorGain = CB_ISP_GetSensorGain;
+  camera_bsp.ov05c10_bsp.appliHelpers.SetSensorExposure = CB_ISP_SetSensorExposure;
+  camera_bsp.ov05c10_bsp.appliHelpers.GetSensorExposure = CB_ISP_GetSensorExposure;
+  camera_bsp.ov05c10_bsp.appliHelpers.GetSensorInfo = CB_ISP_GetSensorInfo;
+
+  ret = CMW_OV05C10_Probe(&camera_bsp.ov05c10_bsp, &Camera_Drv);
+  if (ret != CMW_ERROR_NONE)
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
+  if ((connected_sensor != CMW_OV05C10_Sensor) && (connected_sensor != CMW_UNKNOWN_Sensor))
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
+  if ((initSensors_params->width == 0) || (initSensors_params->height == 0))
+  {
+    ISP_SensorInfoTypeDef sensor_info;
+    Camera_Drv.GetSensorInfo(&camera_bsp, &sensor_info);
+    initSensors_params->width = sensor_info.width;
+    initSensors_params->height = sensor_info.height;
+  }
+
+  CMW_OV05C10_SetDefaultSensorValues(&default_sensor_config);
+  initSensors_params->sensor_config = initSensors_params->sensor_config ? initSensors_params->sensor_config : &default_sensor_config;
+  sensor_config = (CMW_OV05C10_config_t*) (initSensors_params->sensor_config);
+
+  ret = Camera_Drv.Init(&camera_bsp, initSensors_params);
+  if (ret != CMW_ERROR_NONE)
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
+  switch (sensor_config->pixel_format)
+  {
+    case CMW_PIXEL_FORMAT_RAW8:
+    {
+      dt_format = DCMIPP_CSI_DT_BPP8;
+      dt = DCMIPP_DT_RAW8;
+      break;
+    }
+    case CMW_PIXEL_FORMAT_RAW10:
+    case CMW_PIXEL_FORMAT_DEFAULT:
+    {
+      dt_format = DCMIPP_CSI_DT_BPP10;
+      dt = DCMIPP_DT_RAW10;
+      break;
+    }
+    default:
+      return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
+  csi_conf.NumberOfLanes = DCMIPP_CSI_TWO_DATA_LANES;
+  csi_conf.DataLaneMapping = DCMIPP_CSI_PHYSICAL_DATA_LANES;
+  csi_conf.PHYBitrate = DCMIPP_CSI_PHY_BT_800;
+  ret = HAL_DCMIPP_CSI_SetConfig(&hcamera_dcmipp, &csi_conf);
+  if (ret != HAL_OK)
+  {
+    return CMW_ERROR_PERIPH_FAILURE;
+  }
+
+  ret = HAL_DCMIPP_CSI_SetVCConfig(&hcamera_dcmipp, DCMIPP_VIRTUAL_CHANNEL0, dt_format);
+  if (ret != HAL_OK)
+  {
+    return CMW_ERROR_PERIPH_FAILURE;
+  }
+
+  csi_pipe_conf.DataTypeMode = DCMIPP_DTMODE_DTIDA;
+  csi_pipe_conf.DataTypeIDA = dt;
+  csi_pipe_conf.DataTypeIDB = 0;
   for (uint32_t i = DCMIPP_PIPE0; i <= DCMIPP_PIPE2; i++)
   {
     ret = HAL_DCMIPP_CSI_PIPE_SetConfig(&hcamera_dcmipp, i, &csi_pipe_conf);
