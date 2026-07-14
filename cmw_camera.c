@@ -341,6 +341,14 @@ static int CMW_CAMERA_Probe_Sensor(CMW_Sensor_Init_t *initValues, CMW_Sensor_Nam
     return ret;
   }
 #endif
+#if defined(USE_OV05C10_SENSOR)
+  ret = CMW_CAMERA_OV05C10_Init(initValues);
+  if (ret == CMW_ERROR_NONE)
+  {
+    *sensorName = CMW_OV05C10_Sensor;
+    return ret;
+  }
+#endif
 #if defined(USE_OV2740_SENSOR)
   ret = CMW_CAMERA_OV2740_Init(initValues);
   if (ret == CMW_ERROR_NONE)
