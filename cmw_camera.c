@@ -1104,7 +1104,7 @@ static void CMW_CAMERA_XShutdownPin(int value)
   HAL_GPIO_WritePin(XSHUTDN_CAM_PORT, XSHUTDN_CAM_PIN, value ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
-#if defined(USE_VD66GY_SENSOR) || defined(USE_IMX335_SENSOR) || defined(USE_OV02C_SENSOR) || defined(USE_OV2740_SENSOR) || defined(USE_VD5943_SENSOR) || defined(USE_VD1943_SENSOR)
+#if defined(USE_VD66GY_SENSOR) || defined(USE_IMX335_SENSOR) || defined(USE_OV02C_SENSOR) || defined(USE_OV05C10_SENSOR) || defined(USE_OV2740_SENSOR) || defined(USE_VD5943_SENSOR) || defined(USE_VD1943_SENSOR)
 
 static ISP_StatusTypeDef CB_ISP_SetSensorGain(uint32_t camera_instance, int32_t gain)
 {
