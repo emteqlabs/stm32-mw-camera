@@ -700,6 +700,10 @@ static int32_t OV05C10_GetExposureRange(OV05C10_Object_t *pObj, uint32_t *min_us
 
 	uint64_t pclk = pObj->Pclk;
 	uint16_t hts = 0;
+	if (OV05C10_SelectPage(pObj, 0x0F) != OV05C10_OK) {
+		ret = OV05C10_ERROR;
+		goto exit_exp_range;
+	}
 	// read HTS, to determine line time
 	if (ov05c10_read_reg(&pObj->Ctx, OV05C10_REG_HTS, (uint8_t*) &hts, 2) != 0) {
 		ret = OV05C10_ERROR;
@@ -720,6 +724,10 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 	// Vertical Total Size (VTS) = Exposure (t_exposure) / t_line = Exposure / (HTS / PCLK)
 	// PCLK = FPS * HTS * VTS
 	uint16_t hts = 0, vts = 0;
+	if (OV05C10_SelectPage(pObj, 0x0F) != OV05C10_OK) {
+		ret = OV05C10_ERROR;
+		goto exit_exp;
+	}
 
 	// read HTS
 	if (ov05c10_read_reg(&pObj->Ctx, OV05C10_REG_HTS, (uint8_t*) &hts, 2) != OV05C10_OK) {
@@ -842,12 +850,3 @@ int32_t OV05C10_MirrorFlipConfig(OV05C10_Object_t *pObj, OV05C10_MirrorFlip_t Co
 	}
 	exit_mirrorflip: return ret;
 }
-	if (OV05C10_SelectPage(pObj, 0x0F) != OV05C10_OK) {
-		ret = OV05C10_ERROR;
-		goto exit_exp_range;
-	}
-
-	if (OV05C10_SelectPage(pObj, 0x0F) != OV05C10_OK) {
-		ret = OV05C10_ERROR;
-		goto exit_exp;
-	}
