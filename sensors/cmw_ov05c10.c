@@ -52,6 +52,9 @@ static int32_t CMW_OV05C10_getMirrorFlipConfig(uint32_t Config)
 static int32_t CMW_OV05C10_DeInit(void *io_ctx)
 {
   int ret = CMW_ERROR_NONE;
+
+  (void)OV05C10_Stop(&((CMW_OV05C10_t *)io_ctx)->ctx_driver);
+
   ret = ISP_DeInit(&((CMW_OV05C10_t *)io_ctx)->hIsp);
   if (ret)
   {
@@ -236,14 +239,13 @@ static int32_t CMW_OV05C10_Run(void *io_ctx)
 
 static void CMW_OV05C10_PowerOn(CMW_OV05C10_t *io_ctx)
 {
-  io_ctx->ShutdownPin(0);   // xshutdown should be 0 before power on
-  io_ctx->Delay(10);
-  io_ctx->EnablePin(0);     // power off
+  io_ctx->EnablePin(0);
+  io_ctx->ShutdownPin(0);
   io_ctx->Delay(10);
 
-  io_ctx->EnablePin(1);     // power on
+  io_ctx->EnablePin(1);
   io_ctx->Delay(20);
-  io_ctx->ShutdownPin(1);   // xshutdown should be 1 after power on
+  io_ctx->ShutdownPin(1);
   io_ctx->Delay(20);
 }
 

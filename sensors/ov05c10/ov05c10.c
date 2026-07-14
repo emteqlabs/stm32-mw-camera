@@ -35,7 +35,163 @@ struct regval {
 	uint8_t val;
 };
 
-static const struct regval ov05c1010_input_24M_MIPI_2lane_raw10_1928x1082_30fps[] = {
+/*
+ * OVD sequence is banked through 0xFD (8-bit register map):
+ * full register address is (page << 8) | offset.
+ */
+#define OV05C10_REG_PAGE_SELECT 0x00FD
+
+static const struct regval ov05c10r1a_ae02_init_2888x1808_2lane_raw10_60fps[] = {
+	/* reset and base bring-up */
+	{0x00FD, 0x00},
+	{0x0020, 0x00},
+	{0x00FD, 0x00},
+	{0x0020, 0x0b},
+	{0x00C1, 0x09},
+	{0x0021, 0x06},
+	{0x0014, 0x78},
+	{0x00E7, 0x03},
+	{0x00E7, 0x00},
+	{0x0021, 0x00},
+	{0x0014, 0x96},
+	{0x001B, 0xBB},
+
+	/* page 0x01 */
+	{0x00FD, 0x01},
+	{0x0103, 0x00},
+	{0x0104, 0x06},
+	{0x0107, 0x08},
+	{0x011B, 0x01},
+	{0x0124, 0xFF},
+	{0x0142, 0x5D},
+	{0x0143, 0x08},
+	{0x0144, 0x81},
+	{0x0146, 0x5F},
+	{0x0148, 0x18},
+	{0x0149, 0x04},
+	{0x015C, 0x18},
+	{0x015E, 0x13},
+	{0x0170, 0x15},
+	{0x0177, 0x35},
+	{0x0179, 0x00},
+	{0x017B, 0x08},
+	{0x017D, 0x08},
+	{0x017E, 0x08},
+	{0x017F, 0x08},
+	{0x0190, 0x37},
+	{0x0191, 0x05},
+	{0x0192, 0x18},
+	{0x0193, 0x27},
+	{0x0194, 0x05},
+	{0x0195, 0x38},
+	{0x019B, 0x00},
+	{0x019C, 0x06},
+	{0x019D, 0x28},
+	{0x019E, 0x06},
+	{0x01B2, 0x0D},
+	{0x01B3, 0x29},
+	{0x01BF, 0x3C},
+	{0x01C2, 0x04},
+	{0x01C4, 0x00},
+	{0x01CA, 0x20},
+	{0x01CB, 0x20},
+	{0x01CC, 0x28},
+	{0x01CD, 0x28},
+	{0x01CE, 0x20},
+	{0x01CF, 0x20},
+	{0x01D0, 0x2A},
+	{0x01D1, 0x2A},
+
+	/* page 0x0F */
+	{0x00FD, 0x0F},
+	{0x0F00, 0x00},
+	{0x0F01, 0xA0},
+	{0x0F02, 0x48},
+	{0x0F07, 0x8E},
+	{0x0F08, 0x70},
+	{0x0F09, 0x01},
+	{0x0F0B, 0x40},
+	{0x0F0D, 0x07},
+	{0x0F11, 0x33},
+	{0x0F12, 0x77},
+	{0x0F13, 0x66},
+	{0x0F14, 0x65},
+	{0x0F15, 0x37},
+	{0x0F16, 0xBF},
+	{0x0F17, 0xFF},
+	{0x0F18, 0xFF},
+	{0x0F19, 0x12},
+	{0x0F1A, 0x10},
+	{0x0F1C, 0x77},
+	{0x0F1D, 0x77},
+	{0x0F20, 0x0F},
+	{0x0F21, 0x0F},
+	{0x0F22, 0x0F},
+	{0x0F23, 0x0F},
+	{0x0F2B, 0x20},
+	{0x0F2C, 0x20},
+	{0x0F2D, 0x04},
+
+	/* page 0x03 */
+	{0x00FD, 0x03},
+	{0x039D, 0x0F},
+	{0x039F, 0x40},
+	{0x00FD, 0x00},
+	{0x0020, 0x1B},
+
+	/* page 0x04 */
+	{0x00FD, 0x04},
+	{0x0419, 0x60},
+
+	/* page 0x02 */
+	{0x00FD, 0x02},
+	{0x0275, 0x05},
+	{0x027F, 0x06},
+	{0x029A, 0x03},
+	{0x02A2, 0x07},
+	{0x02A3, 0x10},
+	{0x02A5, 0x02},
+	{0x02A6, 0x0B},
+	{0x02A7, 0x48},
+
+	/* page 0x07 */
+	{0x00FD, 0x07},
+	{0x0742, 0x00},
+	{0x0743, 0x80},
+	{0x0744, 0x00},
+	{0x0745, 0x80},
+	{0x0746, 0x00},
+	{0x0747, 0x80},
+	{0x0748, 0x00},
+	{0x0749, 0x80},
+	{0x0700, 0xF7},
+
+	/* finalize on page 0x00 */
+	{0x00FD, 0x00},
+	{0x00E7, 0x03},
+	{0x00E7, 0x00},
+	{0x00FD, 0x00},
+	{0x008E, 0x0B},
+	{0x008F, 0x48},
+	{0x0093, 0x18},
+	{0x0094, 0xFF},
+	{0x0095, 0xBD},
+	{0x0096, 0x1A},
+	{0x0098, 0x04},
+	{0x0099, 0x08},
+	{0x009B, 0x10},
+	{0x009C, 0x3F},
+	{0x00A1, 0x05},
+	{0x00A4, 0x2F},
+	{0x00C0, 0x0C},
+	{0x00C1, 0x08},
+	{0x00C2, 0x00},
+	{0x00B6, 0x20},
+	{0x00BB, 0x80},
+	{0x00FD, 0x00},
+	{0x00A0, 0x00},
+	{0x00FD, 0x01},
+};
 	{0x0301, 0x08},
 	{0x0303, 0x06},
 	{0x0304, 0x01},
@@ -271,6 +427,8 @@ static const struct regval ov05c1010_input_24M_MIPI_2lane_raw10_1928x1082_30fps[
 
 static int32_t OV05C10_WriteTable(OV05C10_Object_t *pObj, const struct regval *regs,
 		uint32_t size);
+static int32_t OV05C10_StreamControl(OV05C10_Object_t *pObj, uint8_t enable);
+static int32_t OV05C10_SelectPage(OV05C10_Object_t *pObj, uint8_t page);
 static int32_t OV05C10_ReadRegWrap(void *handle, uint16_t Reg, uint8_t *Data,
 		uint16_t Length);
 static int32_t OV05C10_WriteRegWrap(void *handle, uint16_t Reg, uint8_t *Data,
@@ -373,9 +531,9 @@ int32_t OV05C10_Init(OV05C10_Object_t *pObj, uint32_t Resolution,
 		switch (Resolution) {
 		case OV05C10_RESOLUTION_1928_1082:
 			if (OV05C10_WriteTable(pObj,
-					ov05c1010_input_24M_MIPI_2lane_raw10_1928x1082_30fps,
+					ov05c10r1a_ae02_init_2888x1808_2lane_raw10_60fps,
 					ARRAY_SIZE(
-							ov05c1010_input_24M_MIPI_2lane_raw10_1928x1082_30fps)) != OV05C10_OK) {
+							ov05c10r1a_ae02_init_2888x1808_2lane_raw10_60fps)) != OV05C10_OK) {
 				ret = OV05C10_ERROR;
 			}
 			break;
@@ -406,15 +564,73 @@ int32_t OV05C10_DeInit(OV05C10_Object_t *pObj) {
 }
 
 int32_t OV05C10_Start(OV05C10_Object_t *pObj) {
-	int ret = OV05C10_OK;
-	uint8_t tmp;
-	/* Start streaming */
-	tmp = OV05C10_MODE_STREAMING;
-	if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_MODE_SELECT, &tmp, 1) != OV05C10_OK) {
-		ret = OV05C10_ERROR;
-	} else {
-		OV05C10_Delay(pObj, 20);
+	return OV05C10_StreamControl(pObj, 1U);
+}
+
+int32_t OV05C10_Stop(OV05C10_Object_t *pObj) {
+	return OV05C10_StreamControl(pObj, 0U);
+}
+
+static int32_t OV05C10_StreamControl(OV05C10_Object_t *pObj, uint8_t enable) {
+	int32_t ret = OV05C10_OK;
+	uint8_t val;
+
+	/* OVD stream control sequence */
+	val = 0x01;
+	if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_PAGE_SELECT, &val, 1) != OV05C10_OK) {
+		return OV05C10_ERROR;
 	}
+
+	if (enable) {
+		val = 0x03;
+		if (ov05c10_write_reg(&pObj->Ctx, 0x0133, &val, 1) != OV05C10_OK) {
+			ret = OV05C10_ERROR;
+		}
+		val = 0x02;
+		if ((ret == OV05C10_OK)
+				&& (ov05c10_write_reg(&pObj->Ctx, 0x0101, &val, 1) != OV05C10_OK)) {
+			ret = OV05C10_ERROR;
+		}
+		val = 0x00;
+		if ((ret == OV05C10_OK)
+				&& (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_PAGE_SELECT, &val,
+						1) != OV05C10_OK)) {
+			ret = OV05C10_ERROR;
+		}
+		val = 0x1F;
+		if ((ret == OV05C10_OK)
+				&& (ov05c10_write_reg(&pObj->Ctx, 0x0020, &val, 1) != OV05C10_OK)) {
+			ret = OV05C10_ERROR;
+		}
+	} else {
+		val = 0x00;
+		if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_PAGE_SELECT, &val, 1) != OV05C10_OK) {
+			ret = OV05C10_ERROR;
+		}
+		val = 0x5B;
+		if ((ret == OV05C10_OK)
+				&& (ov05c10_write_reg(&pObj->Ctx, 0x0020, &val, 1) != OV05C10_OK)) {
+			ret = OV05C10_ERROR;
+		}
+		val = 0x01;
+		if ((ret == OV05C10_OK)
+				&& (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_PAGE_SELECT, &val,
+						1) != OV05C10_OK)) {
+			ret = OV05C10_ERROR;
+		}
+		val = 0x02;
+		if ((ret == OV05C10_OK)
+				&& (ov05c10_write_reg(&pObj->Ctx, 0x0133, &val, 1) != OV05C10_OK)) {
+			ret = OV05C10_ERROR;
+		}
+		val = 0x02;
+		if ((ret == OV05C10_OK)
+				&& (ov05c10_write_reg(&pObj->Ctx, 0x0101, &val, 1) != OV05C10_OK)) {
+			ret = OV05C10_ERROR;
+		}
+	}
+
+	OV05C10_Delay(pObj, 20);
 	return ret;
 }
 
@@ -506,6 +722,9 @@ int32_t OV05C10_GetSensorInfo(OV05C10_Object_t *pObj, OV05C10_SensorInfo_t *Info
 
 static int32_t OV05C10_SetAnalogGain(OV05C10_Object_t *pObj, float gain_dBm) {
 	int ret = OV05C10_OK;
+	if (OV05C10_SelectPage(pObj, 0x01) != OV05C10_OK) {
+		return OV05C10_ERROR;
+	}
 	if (gain_dBm < 0) {
 		gain_dBm = 0;
 	} else if (gain_dBm > OV05C10_ANALOG_GAIN_MAX_DBM) {
@@ -531,6 +750,12 @@ static int32_t OV05C10_SetAnalogGain(OV05C10_Object_t *pObj, float gain_dBm) {
 
 static int32_t OV05C10_SetDigitalGain(OV05C10_Object_t *pObj, float gain_dBm) {
 	int ret = OV05C10_OK;
+	(void)pObj;
+	(void)gain_dBm;
+	return OV05C10_OK;
+
+	/* Unused for current OVD mode, kept for API compatibility. */
+	/*
 	if (gain_dBm < 0) {
 		gain_dBm = 0;
 	} else if (gain_dBm > OV05C10_DIGITAL_GAIN_MAX_DBM) {
@@ -552,6 +777,7 @@ static int32_t OV05C10_SetDigitalGain(OV05C10_Object_t *pObj, float gain_dBm) {
 		goto exit_gain;
 	}
 	exit_gain: return ret;
+	*/
 }
 
 int32_t OV05C10_SetGain(OV05C10_Object_t *pObj, int32_t gain_dBm) {
@@ -780,6 +1006,11 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 		lines = vts_new - OV05C10_EXPOSURE_MAX_LINES_MARGIN;
 	}
 
+	if (OV05C10_SelectPage(pObj, 0x01) != OV05C10_OK) {
+		ret = OV05C10_ERROR;
+		goto exit_exp;
+	}
+
 	/* Write exposure lines (16-bit: 0x3501 = MSB, 0x3502 = LSB) */
 	uint16_t exp_val = SWAP_ENDIAN16((uint16_t )lines);
 	if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_EXPOSURE, (uint8_t*) &exp_val, 2)
@@ -789,6 +1020,14 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 	}
 exit_exp:
 	return ret;
+}
+
+static int32_t OV05C10_SelectPage(OV05C10_Object_t *pObj, uint8_t page) {
+	if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_PAGE_SELECT, &page, 1)
+			!= OV05C10_OK) {
+		return OV05C10_ERROR;
+	}
+	return OV05C10_OK;
 }
 
 int32_t OV05C10_MirrorFlipConfig(OV05C10_Object_t *pObj, OV05C10_MirrorFlip_t Config) {
@@ -834,4 +1073,12 @@ int32_t OV05C10_MirrorFlipConfig(OV05C10_Object_t *pObj, OV05C10_MirrorFlip_t Co
 	}
 	exit_mirrorflip: return ret;
 }
+	if (OV05C10_SelectPage(pObj, 0x0F) != OV05C10_OK) {
+		ret = OV05C10_ERROR;
+		goto exit_exp_range;
+	}
 
+	if (OV05C10_SelectPage(pObj, 0x0F) != OV05C10_OK) {
+		ret = OV05C10_ERROR;
+		goto exit_exp;
+	}

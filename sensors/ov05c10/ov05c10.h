@@ -119,6 +119,7 @@ int32_t OV05C10_RegisterBusIO(OV05C10_Object_t *pObj, OV05C10_IO_t *pIO);
 int32_t OV05C10_Init(OV05C10_Object_t *pObj, uint32_t Resolution, uint32_t PixelFormat);
 int32_t OV05C10_DeInit(OV05C10_Object_t *pObj);
 int32_t OV05C10_Start(OV05C10_Object_t *pObj);
+int32_t OV05C10_Stop(OV05C10_Object_t *pObj);
 int32_t OV05C10_ReadID(OV05C10_Object_t *pObj, uint32_t *Id);
 int32_t OV05C10_GetCapabilities(OV05C10_Object_t *pObj, OV05C10_Capabilities_t *Capabilities);
 int32_t OV05C10_SetGain(OV05C10_Object_t *pObj, int32_t gain);
