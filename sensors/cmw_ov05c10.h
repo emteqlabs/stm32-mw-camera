@@ -6,11 +6,11 @@
 #endif
 
 #include <stdint.h>
+#include "cmw_camera.h"
 #include "cmw_sensors_if.h"
 #include "cmw_errno.h"
 #include "ov05c10.h"
 #include "isp_api.h"
-#include "cmw_camera.h"
 
 typedef struct
 {
