@@ -103,10 +103,12 @@ static union
 #if defined(USE_OV02C_SENSOR)
   CMW_OV02C_t ov02c_bsp;
 #endif
+#if defined(USE_OV05C10_SENSOR)
+  CMW_OV05C10_t ov05c10_bsp;
+#endif
 #if defined(USE_OV2740_SENSOR)
   CMW_OV2740_t ov2740_bsp;
 #endif
-
 #if defined(USE_VD56G3_SENSOR)
   CMW_VD56G3_t vd56g3_bsp;
 #endif
@@ -2537,6 +2539,11 @@ int32_t CMW_CAMERA_SetDefaultSensorValues( CMW_Advanced_Config_t *advanced_confi
 #if defined(USE_OV02C_SENSOR)
   case CMW_OV02C_Sensor:
     CMW_OV02C_SetDefaultSensorValues(&advanced_config->config_sensor.ov02c_config);
+    break;
+#endif
+#if defined(USE_OV05C10_SENSOR)
+  case CMW_OV05C10_Sensor:
+    CMW_OV05C10_SetDefaultSensorValues(&advanced_config->config_sensor.ov02c_config);
     break;
 #endif
 #if defined(USE_VD65G4_SENSOR)
