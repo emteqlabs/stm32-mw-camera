@@ -12,7 +12,7 @@
 #define OV05C10_REG_ID_BYTE_2                 0x300a
 #define OV05C10_REG_ID_BYTE_1                 0x300b
 #define OV05C10_REG_ID_BYTE_0                 0x300c
-#define OV05C10_CHIP_ID                       0x4305  // last byte, is not 0x03 as per datasheet, but 0x43, ignoring it
+#define OV05C10_CHIP_ID                       0x43055610
 
 #define OV05C10_REG_MODE_SELECT               0x0020
 #define OV05C10_MODE_STANDBY                  0x5B
