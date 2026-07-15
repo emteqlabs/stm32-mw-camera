@@ -9,9 +9,10 @@
 
 #define OV05C10_NAME                          "OV05C1010"
 
-#define OV05C10_REG_ID_BYTE_2                 0x300a
-#define OV05C10_REG_ID_BYTE_1                 0x300b
-#define OV05C10_REG_ID_BYTE_0                 0x300c
+#define OV05C10_REG_ID_BYTE_3                 0x0000
+#define OV05C10_REG_ID_BYTE_2                 0x0001
+#define OV05C10_REG_ID_BYTE_1                 0x0002
+#define OV05C10_REG_ID_BYTE_0                 0x0003
 #define OV05C10_CHIP_ID                       0x43055610
 
 #define OV05C10_REG_MODE_SELECT               0x0020

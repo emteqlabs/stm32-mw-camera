@@ -405,10 +405,19 @@ static int32_t OV05C10_StreamControl(OV05C10_Object_t *pObj, uint8_t enable) {
 
 int32_t OV05C10_ReadID(OV05C10_Object_t *pObj, uint32_t *Id) {
 	int32_t ret = OV05C10_OK;
-	uint8_t tmp[3];
+	uint8_t tmp[4] = {0};
+	uint8_t page;
 
 	/* Initialize I2C */
+	if ((pObj == NULL) || (Id == NULL) || (pObj->IO.Init == NULL)) {
+		return OV05C10_ERROR;
+	}
 	pObj->IO.Init();
+
+	page = 0x00;
+	if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_PAGE_SELECT, &page, 1) != OV05C10_OK) {
+		return OV05C10_ERROR;
+	}
 
 	if (ov05c10_read_reg(&pObj->Ctx, OV05C10_REG_ID_BYTE_2, &tmp[2], 1) != OV05C10_OK) {
 		ret = OV05C10_ERROR;
@@ -426,9 +435,15 @@ int32_t OV05C10_ReadID(OV05C10_Object_t *pObj, uint32_t *Id) {
 		}
 
 	}
-	// for some reason, LSB of chip ID is not 0x03, but 0x43... ignoring it for now
+	if (ov05c10_read_reg(&pObj->Ctx, OV05C10_REG_ID_BYTE_3, &tmp[3], 1) != OV05C10_OK) {
+		ret = OV05C10_ERROR;
+	}
+
 	if (!ret) {
-		*Id = (tmp[2] << 8) | (tmp[1] << 0);
+		*Id = ((uint32_t)tmp[3] << 24) |
+			  ((uint32_t)tmp[2] << 16) |
+			  ((uint32_t)tmp[1] << 8)  |
+		  ((uint32_t)tmp[0] << 0);
 	}
 
 	return ret;
