@@ -239,16 +239,16 @@ static int32_t CMW_OV05C10_Run(void *io_ctx)
 
 static void CMW_OV05C10_PowerOn(CMW_OV05C10_t *io_ctx)
 {
-  io_ctx->ShutdownPin(0);
+  io_ctx->XShutdownPin(0);
   io_ctx->Delay(1);
 
   io_ctx->EnablePin(1);
 
-  io_ctx->Delay(5);
+  io_ctx->Delay(10);  // min 5 ms
 
-  io_ctx->ShutdownPin(1);
+  io_ctx->XShutdownPin(1);
 
-  io_ctx->Delay(8);
+  io_ctx->Delay(10);  // min 8 ms
 }
 
 static void CMW_OV05C10_VsyncEventCallback(void *io_ctx, uint32_t pipe)

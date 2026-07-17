@@ -2151,7 +2151,7 @@ static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initSensors_params)
   camera_bsp.ov05c10_bsp.WriteReg    = CMW_I2C_WRITEREG16;
   camera_bsp.ov05c10_bsp.GetTick     = BSP_GetTick;
   camera_bsp.ov05c10_bsp.Delay       = HAL_Delay;
-  camera_bsp.ov05c10_bsp.ShutdownPin = CMW_CAMERA_ShutdownPin;
+  camera_bsp.ov05c10_bsp.XShutdownPin = CMW_CAMERA_XShutdownPin;
   camera_bsp.ov05c10_bsp.EnablePin   = CMW_CAMERA_EnablePin;
   camera_bsp.ov05c10_bsp.hdcmipp     = &hcamera_dcmipp;
   camera_bsp.ov05c10_bsp.appliHelpers.SetSensorGain = CB_ISP_SetSensorGain;
