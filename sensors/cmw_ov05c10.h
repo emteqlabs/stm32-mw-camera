@@ -27,7 +27,7 @@ typedef struct
   int32_t (*ReadReg) (uint16_t, uint16_t, uint8_t*, uint16_t);
   int32_t (*GetTick) (void);
   void (*Delay)(uint32_t delay_in_ms);
-  void (*ShutdownPin)(int value);
+  void (*XShutdownPin)(int value);
   void (*EnablePin)(int value);
 } CMW_OV05C10_t;
 
