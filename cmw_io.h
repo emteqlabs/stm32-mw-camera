@@ -67,8 +67,8 @@ extern "C" {
   #define EN_CAM_GPIO_ENABLE_VDDIO()
   #define EN_CAM_GPIO_CLK_ENABLE()        __HAL_RCC_GPIOD_CLK_ENABLE()
 
-  #define XSHUTDN_CAM_PIN                 GPIO_PIN_6
-  #define XSHUTDN_CAM_PORT                GPIOD
+  #define XSHUTDN_CAM_PIN                 GPIO_PIN_13
+  #define XSHUTDN_CAM_PORT                GPIOE
   /* PD6 on VDD Core */
   #define XSHUTDN_CAM_GPIO_ENABLE_VDDIO()
   #define XSHUTDN_CAM_GPIO_CLK_ENABLE()   __HAL_RCC_GPIOD_CLK_ENABLE()
