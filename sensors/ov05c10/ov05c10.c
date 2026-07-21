@@ -891,7 +891,9 @@ static int32_t OV05C10_GetExposureRange(OV05C10_Object_t *pObj, uint32_t *min_us
 
 	uint64_t pclk = pObj->Pclk;
 	uint16_t hts = 0;
-	if (OV05C10_SelectPage(pObj, 0x0F) != OV05C10_OK) {
+	uint8_t vts_raw[3] = { 0U };
+	uint32_t vts = 0U;
+	if (OV05C10_SelectPage(pObj, 0x01) != OV05C10_OK) {
 		ret = OV05C10_ERROR;
 		goto exit_exp_range;
 	}
@@ -900,10 +902,22 @@ static int32_t OV05C10_GetExposureRange(OV05C10_Object_t *pObj, uint32_t *min_us
 		ret = OV05C10_ERROR;
 		goto exit_exp_range;
 	}
+	if (ov05c10_read_reg(&pObj->Ctx, OV05C10_REG_VTS_MSB, vts_raw, 3) != 0) {
+		ret = OV05C10_ERROR;
+		goto exit_exp_range;
+	}
 	hts = SWAP_ENDIAN16(hts);
+	vts = ((uint32_t) vts_raw[0] << 16) | ((uint32_t) vts_raw[1] << 8) | vts_raw[2];
+	if (vts == 0U) {
+		vts = OV05C10_EXPOSURE_MAX_VTS;
+	}
+	if (vts <= OV05C10_EXPOSURE_MAX_LINES_MARGIN) {
+		ret = OV05C10_ERROR;
+		goto exit_exp_range;
+	}
 	uint32_t line_us = (hts * 1000000) / pclk;
 	*min_us = OV05C10_EXPOSURE_MIN_LINES * line_us;
-	*max_us = (OV05C10_EXPOSURE_MAX_VTS - OV05C10_EXPOSURE_MAX_LINES_MARGIN) * line_us;
+	*max_us = (vts - OV05C10_EXPOSURE_MAX_LINES_MARGIN) * line_us;
 	exit_exp_range: return ret;
 }
 
@@ -914,8 +928,10 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 	// line time (t_line) = Horizontal Total Size (HTS) / Pixel Clock (PCLK)
 	// Vertical Total Size (VTS) = Exposure (t_exposure) / t_line = Exposure / (HTS / PCLK)
 	// PCLK = FPS * HTS * VTS
-	uint16_t hts = 0, vts = 0;
-	if (OV05C10_SelectPage(pObj, 0x0F) != OV05C10_OK) {
+	uint16_t hts = 0, vblank = 0;
+	uint8_t vts_raw[3] = { 0U };
+	uint32_t vts = 0U;
+	if (OV05C10_SelectPage(pObj, 0x01) != OV05C10_OK) {
 		ret = OV05C10_ERROR;
 		goto exit_exp;
 	}
@@ -925,7 +941,12 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 		ret = OV05C10_ERROR;
 		goto exit_exp;
 	}
+	if (ov05c10_read_reg(&pObj->Ctx, OV05C10_REG_VTS_MSB, vts_raw, 3) != OV05C10_OK) {
+		ret = OV05C10_ERROR;
+		goto exit_exp;
+	}
 	hts = SWAP_ENDIAN16(hts);
+	vts = ((uint32_t) vts_raw[0] << 16) | ((uint32_t) vts_raw[1] << 8) | vts_raw[2];
 
 	if (hts == 0 || pObj->Pclk == 0) {
         ret = OV05C10_ERROR; // Avoid division by zero
@@ -954,16 +975,16 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 		vts_new = OV05C10_EXPOSURE_MAX_VTS;
 	}
 
-	/* read current VTS and update with new if different */
-	if (ov05c10_read_reg(&pObj->Ctx, OV05C10_REG_VTS, (uint8_t*) &vts, 2) != OV05C10_OK) {
-		ret = OV05C10_ERROR;
-		goto exit_exp;
-	}
-	vts = SWAP_ENDIAN16(vts);
-
+	/* VTS is read-only on page 1 (0x34/0x35/0x36), adjust via VBLANK (0x05/0x06). */
 	if(vts_new != vts) {
-		uint16_t vts_reg = SWAP_ENDIAN16((uint16_t )vts_new);
-		if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_VTS, (uint8_t*) &vts_reg, 2) != OV05C10_OK) {
+		uint8_t trigger = 0x01;
+		vblank = (vts_new > OV05C10_HEIGHT) ? (uint16_t) (vts_new - OV05C10_HEIGHT) : 0U;
+		vblank = SWAP_ENDIAN16(vblank);
+		if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_VBLANK, (uint8_t*) &vblank, 2) != OV05C10_OK) {
+			ret = OV05C10_ERROR;
+			goto exit_exp;
+		}
+		if (ov05c10_write_reg(&pObj->Ctx, OV05C10_REG_VBLANK_TRIGGER, &trigger, 1) != OV05C10_OK) {
 			ret = OV05C10_ERROR;
 			goto exit_exp;
 		}

@@ -43,12 +43,16 @@
 #define OV05C10_GAIN_MIN                      0      // dBm
 #define OV05C10_GAIN_MAX                      30000  // dBm
 
-#define OV05C10_REG_HTS                       0x0F00
-#define OV05C10_REG_HTS_MSB                   0x0F00
-#define OV05C10_REG_HTS_LSB                   0x0F01
-#define OV05C10_REG_VTS                       0x0F02
-#define OV05C10_REG_VTS_MSB                   0x0F02
-#define OV05C10_REG_VTS_LSB                   0x0F03
+#define OV05C10_REG_HTS                       0x0137  /* page 0x01, read-only */
+#define OV05C10_REG_HTS_MSB                   0x0137  /* page 0x01, read-only */
+#define OV05C10_REG_HTS_LSB                   0x0138  /* page 0x01, read-only */
+#define OV05C10_REG_VTS_MSB                   0x0134  /* page 0x01, read-only */
+#define OV05C10_REG_VTS_MID                   0x0135  /* page 0x01, read-only */
+#define OV05C10_REG_VTS_LSB                   0x0136  /* page 0x01, read-only */
+#define OV05C10_REG_VBLANK                    0x0105  /* page 0x01, write */
+#define OV05C10_REG_VBLANK_MSB                0x0105  /* page 0x01, write */
+#define OV05C10_REG_VBLANK_LSB                0x0106  /* page 0x01, write */
+#define OV05C10_REG_VBLANK_TRIGGER            0x0101  /* page 0x01, write 0x01 */
 
 #define OV05C10_REG_FORMAT                    0x0101
 #define OV05C1010_REG_ISP_X_WIN_CONTROL       0x0700
