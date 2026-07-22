@@ -29,6 +29,8 @@ typedef struct
   OV05C10_IO_t         IO;
   ov05c10_ctx_t        Ctx;
   uint8_t            IsInitialized;
+  uint8_t            CurrentPage;
+  uint8_t            PageValid;
   uint64_t 			 Pclk;  // Hz
 } OV05C10_Object_t;
 
