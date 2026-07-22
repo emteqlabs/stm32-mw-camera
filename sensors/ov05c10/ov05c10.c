@@ -765,125 +765,104 @@ int32_t OV05C10_SetGain(OV05C10_Object_t *pObj, int32_t gain_dBm) {
 
 static int32_t OV05C10_GetPCLK(OV05C10_Object_t *pObj, uint64_t *pclk) {
 	int32_t ret;
-	float PLL2_PreDiv0, PLL2_PreDiv = 1.0f;
-	uint16_t PLL2_DivLoop;
-	float PLL2_DivSys = 1.0f;
-	uint8_t PLL2_DivSysPre, PLL2_Sa1Div, PLL2_DivDac, PLL2_SRAMDiv;
-	float PLL2_VCO, PLL2_SCLK, PLL2_DACCLK, PLL2_SRAMCLK, PLL2_SA1CLK;
-	static const uint8_t mclk = 24;  // MHz
+	const double iclk = 24.0;   // MHz
+	const double osc_clk = 144.0;
 
-	// Required registers
-	uint8_t R314, R315, R316, R317, R318, R31a, R31c, R31d, R321;
+	uint8_t r10, r11, r12, r13, r14, r15, r19, r1a, r1b, r1c, r1d, r1e;
+	double mpll_mc = 1.0, dpll_mc = 1.0, rowclk = 1.0;
 
-	// Read registers
-	ret = OV05C10_SelectPage(pObj, 0x03);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x14, &R314, 1);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x15, &R315, 1);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x16, &R316, 1);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x17, &R317, 1);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x18, &R318, 1);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x1A, &R31a, 1);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x1C, &R31c, 1);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x1D, &R31d, 1);
-	if (ret != 0)
-		goto exit_pclk;
-	ret = ov05c10_read_reg(&pObj->Ctx, 0x21, &R321, 1);
-	if (ret != 0)
+	ret = OV05C10_SelectPage(pObj, 0x00);
+	if (ret != OV05C10_OK)
 		goto exit_pclk;
 
-	PLL2_PreDiv0 = (float) ((R31a & 0x1) + 1);
-	switch (R314 & 0x7) {
-	case 0:
-		PLL2_PreDiv = 1.0f;
-		break;
-	case 1:
-		PLL2_PreDiv = 1.5f;
-		break;
-	case 2:
-		PLL2_PreDiv = 2.0f;
-		break;
-	case 3:
-		PLL2_PreDiv = 2.5f;
-		break;
-	case 4:
-		PLL2_PreDiv = 3.0f;
-		break;
-	case 5:
-		PLL2_PreDiv = 4.0f;
-		break;
-	case 6:
-		PLL2_PreDiv = 6.0f;
-		break;
-	case 7:
-		PLL2_PreDiv = 8.0f;
-		break;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x10, &r10, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x11, &r11, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x12, &r12, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x13, &r13, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x14, &r14, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x15, &r15, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x19, &r19, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x1A, &r1a, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x1B, &r1b, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x1C, &r1c, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x1D, &r1d, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+	ret = ov05c10_read_reg(&pObj->Ctx, 0x1E, &r1e, 1);
+	if (ret != OV05C10_OK) goto exit_pclk;
+
+	/* Follow manufacturer script equations. */
+	uint8_t mpll_byp_sel = r19 & 0x01;
+	double mpllloopdiv_by2_sel = ((r15 & 0x04) ? 1.0 : 0.0) + 1.0;
+	double mpll_nc_high = (double) (r1a & 0x30) / 256.0;
+	double mpll_nc_low = (double) r1b;
+	uint8_t mpll_mc_sel = r1a & 0x07;
+	static const double mc_lut[8] = { 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 8.0 };
+	mpll_mc = mc_lut[mpll_mc_sel];
+	double mpll_predivp_sel = ((r1c & 0x80) ? 1.0 : 0.0) + 1.0;
+
+	double mpll_clk_sel;
+	if (mpll_byp_sel != 0U) {
+		mpll_clk_sel = osc_clk;
+	} else {
+		mpll_clk_sel = iclk * (mpllloopdiv_by2_sel * (mpll_nc_high * 256.0 + mpll_nc_low))
+				/ mpll_predivp_sel / mpll_mc;
 	}
 
-	PLL2_DivLoop = ((R315 & 0x3) << 8) | R316;
+	uint8_t dpll_byp_sel = r10 & 0x01;
+	double dpll_nc_high = (double) (r13 & 0x30) / 256.0;
+	double dpll_nc_low = (double) r14;
+	uint8_t dpll_mc_sel = r13 & 0x07;
+	dpll_mc = mc_lut[dpll_mc_sel];
+	double dpll_vcoby2_sel = ((r15 & 0x02) ? 1.0 : 0.0) + 1.0;
+	double dpll_out = iclk
+			* (((1.0 - (double) dpll_byp_sel)
+					* (dpll_nc_high * 256.0 + dpll_nc_low) * dpll_vcoby2_sel)
+					+ (double) dpll_byp_sel)
+			/ dpll_mc / dpll_vcoby2_sel;
 
-	switch (R317 & 0xf) {
-	case 0:
-		PLL2_DivSys = 1.0f;
-		break;
-	case 1:
-		PLL2_DivSys = 1.5f;
-		break;
-	case 2:
-		PLL2_DivSys = 2.0f;
-		break;
-	case 3:
-		PLL2_DivSys = 2.5f;
-		break;
-	case 4:
-		PLL2_DivSys = 3.0f;
-		break;
-	case 5:
-		PLL2_DivSys = 3.5f;
-		break;
-	case 6:
-		PLL2_DivSys = 4.0f;
-		break;
-	case 7:
-		PLL2_DivSys = 5.0f;
-		break;
+	uint8_t rowclk_ctrl = r1e & 0x03;
+	rowclk = (double) (1U << rowclk_ctrl);
+
+	uint8_t dpll_row_clkpost_sel = (r11 & 0x60) >> 5;
+	double dpll_cnt_clk_sel = (double) ((r10 & 0x18) >> 3) + 1.0;
+	double dpll_dacclk_400m = dpll_out / dpll_cnt_clk_sel;
+	double dpll_divrow_sel = (double) (r12 & 0x03) + 5.0;
+	double dpll_rowclk_60m;
+	if (dpll_row_clkpost_sel < 2U) {
+		dpll_rowclk_60m = iclk / dpll_cnt_clk_sel;
+	} else {
+		dpll_rowclk_60m = dpll_dacclk_400m / dpll_divrow_sel
+				/ ((double) (dpll_row_clkpost_sel - 2U) * 2.0 + 2.0) / dpll_cnt_clk_sel;
 	}
 
-	PLL2_DivSysPre = (R318 & 0xf) + 1;
-	PLL2_Sa1Div = (R31c & 0xf) + 1;
-	PLL2_DivDac = (R31d & 0x1f) + 1;
-	PLL2_SRAMDiv = (R321 & 0x7) + 1;
+	uint8_t rowclk_sel = (r1d & 0x02) >> 1;
+	double mpll_pclk_sel_pre = (double) (r1c & 0x03) + 1.0;
+	double mpll_pclk_sel = (double) ((r1c & 0x0C) >> 2) + 3.0;
+	double dpll_pclkdiv_sel = (double) (r11 & 0x03) + 3.0;
 
-	PLL2_VCO = mclk / PLL2_PreDiv0 / PLL2_PreDiv * PLL2_DivLoop;
-	PLL2_SCLK = PLL2_VCO / PLL2_DivSys / PLL2_DivSysPre;
-	PLL2_DACCLK = PLL2_VCO / PLL2_DivDac;
-	PLL2_SRAMCLK = PLL2_VCO / PLL2_SRAMDiv;
-	PLL2_SA1CLK = PLL2_VCO / PLL2_Sa1Div;
+	double mpll_pclk_190m = mpll_clk_sel / mpll_pclk_sel_pre / mpll_pclk_sel / 2.0;
+	double dpll_clk_220m = dpll_out / dpll_pclkdiv_sel;
 
-	(void)PLL2_SRAMCLK;
-	(void)PLL2_DACCLK;
-	(void)PLL2_SCLK;
+	uint8_t pllclk_sel = r1d & 0x01;
+	double pll_clk = (pllclk_sel == 0U) ? mpll_pclk_190m : dpll_clk_220m;
+	double pll_row_clk = (rowclk_sel != 0U) ? dpll_rowclk_60m : pll_clk;
+	double row_clk = pll_row_clk / rowclk;
 
-	// Output SA1 clock as PCLK, in Hz
-	*pclk = ((uint64_t) PLL2_SA1CLK * 1000000);
+	*pclk = (uint64_t) (row_clk * 1000000.0);
 	ret = OV05C10_OK;
 
-	exit_pclk: return ret;
+exit_pclk:
+	return ret;
 }
 
 static int32_t OV05C10_GetExposureRange(OV05C10_Object_t *pObj, uint32_t *min_us,
@@ -891,15 +870,16 @@ static int32_t OV05C10_GetExposureRange(OV05C10_Object_t *pObj, uint32_t *min_us
 	int32_t ret = OV05C10_OK;
 
 	uint64_t pclk = pObj->Pclk;
-	uint16_t hts = 0;
+	uint8_t hts_raw[2] = { 0U };
 	uint8_t vts_raw[3] = { 0U };
 	uint32_t vts = 0U;
+	uint16_t hts = 0U;
 	if (OV05C10_SelectPage(pObj, 0x01) != OV05C10_OK) {
 		ret = OV05C10_ERROR;
 		goto exit_exp_range;
 	}
 	// read HTS, to determine line time
-	if (ov05c10_read_reg(&pObj->Ctx, 0x37, (uint8_t*) &hts, 2) != 0) {
+	if (ov05c10_read_reg(&pObj->Ctx, 0x37, hts_raw, 2) != 0) {
 		ret = OV05C10_ERROR;
 		goto exit_exp_range;
 	}
@@ -907,7 +887,7 @@ static int32_t OV05C10_GetExposureRange(OV05C10_Object_t *pObj, uint32_t *min_us
 		ret = OV05C10_ERROR;
 		goto exit_exp_range;
 	}
-	hts = SWAP_ENDIAN16(hts);
+	hts = ((uint16_t) hts_raw[0] << 8) | hts_raw[1];
 	vts = ((uint32_t) vts_raw[0] << 16) | ((uint32_t) vts_raw[1] << 8) | vts_raw[2];
 	if (vts == 0U) {
 		vts = OV05C10_EXPOSURE_MAX_VTS;
@@ -929,6 +909,7 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 	// line time (t_line) = Horizontal Total Size (HTS) / Pixel Clock (PCLK)
 	// Vertical Total Size (VTS) = Exposure (t_exposure) / t_line = Exposure / (HTS / PCLK)
 	// PCLK = FPS * HTS * VTS
+	uint8_t hts_raw[2] = { 0U };
 	uint16_t hts = 0, vblank = 0;
 	uint8_t vts_raw[3] = { 0U };
 	uint32_t vts = 0U;
@@ -938,7 +919,7 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 	}
 
 	// read HTS
-	if (ov05c10_read_reg(&pObj->Ctx, 0x37, (uint8_t*) &hts, 2) != OV05C10_OK) {
+	if (ov05c10_read_reg(&pObj->Ctx, 0x37, hts_raw, 2) != OV05C10_OK) {
 		ret = OV05C10_ERROR;
 		goto exit_exp;
 	}
@@ -946,7 +927,7 @@ int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure_us) {
 		ret = OV05C10_ERROR;
 		goto exit_exp;
 	}
-	hts = SWAP_ENDIAN16(hts);
+	hts = ((uint16_t) hts_raw[0] << 8) | hts_raw[1];
 	vts = ((uint32_t) vts_raw[0] << 16) | ((uint32_t) vts_raw[1] << 8) | vts_raw[2];
 
 	if (hts == 0 || pObj->Pclk == 0) {
