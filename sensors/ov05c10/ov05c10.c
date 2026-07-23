@@ -769,7 +769,7 @@ int32_t OV05C10_SetGain(OV05C10_Object_t *pObj, int32_t gain_dBm) {
 
 static int32_t OV05C10_GetPCLK(OV05C10_Object_t *pObj, uint64_t *pclk) {
 	int32_t ret;
-	const double iclk = 19.2;   // MHz
+	const double iclk = 24;   // MHz
 	const double osc_clk = 144.0;
 
 	uint8_t r10, r11, r12, r13, r14, r15, r19, r1a, r1b, r1c, r1d, r1e;
