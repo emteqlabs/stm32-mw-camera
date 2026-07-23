@@ -86,6 +86,8 @@ extern "C" {
   #define CMW_I2C_DEINIT BSP_I2C1_DeInit
   #define CMW_I2C_READREG16 BSP_I2C1_ReadReg16
   #define CMW_I2C_WRITEREG16 BSP_I2C1_WriteReg16
+  #define CMW_I2C_READREG BSP_I2C1_ReadReg
+  #define CMW_I2C_WRITEREG BSP_I2C1_WriteReg
 #endif /* STM32N6570_NUCLEO_REV */
 
 #define CSI2_CLK_ENABLE()               __HAL_RCC_CSI_CLK_ENABLE()
