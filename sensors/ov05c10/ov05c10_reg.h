@@ -27,9 +27,9 @@
 #define OV05C10_REG_DIGITAL_GAIN              0x00  // Not used in current OVD sequence
 
 #define OV05C10_EXPOSURE_MIN_LINES            (uint16_t)4       // min exposure in lines
-#define OV05C10_EXPOSURE_MIN_VTS              (uint16_t)0x071E  // min vts from OVD (1822)
+#define OV05C10_EXPOSURE_MIN_VTS              (uint16_t)0x0E88  // min vts from OVD (3720)
 #define OV05C10_EXPOSURE_MAX_LINES_MARGIN     (uint16_t)15      // margin for max exposure
-#define OV05C10_EXPOSURE_MAX_VTS              (uint16_t)0x071E  // max vts from OVD (1822)
+#define OV05C10_EXPOSURE_MAX_VTS              (uint16_t)0x0E88  // max vts from OVD (3720)
 
 #define OV05C10_EXPOSURE_MIN                  31       // us, approximate for 4 lines at OVD timing
 #define OV05C10_EXPOSURE_MAX                  14309    // us, approximate for (VTS-margin) at OVD timing
