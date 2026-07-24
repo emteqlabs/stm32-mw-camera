@@ -18,7 +18,7 @@ static int CMW_OV05C10_GetResType(uint32_t width, uint32_t height, uint32_t*res)
 {
   if (width == OV05C10_WIDTH && height == OV05C10_HEIGHT)
   {
-    *res = OV05C10_RESOLUTION_1928_1082;
+    *res = OV05C10_RESOLUTION_2888_1808;
   }
   else
   {
@@ -82,6 +82,16 @@ static int32_t CMW_OV05C10_SetGain(void *io_ctx, int32_t gain)
 static int32_t CMW_OV05C10_SetExposure(void *io_ctx, int32_t exposure)
 {
   return OV05C10_SetExposure(&((CMW_OV05C10_t *)io_ctx)->ctx_driver, exposure);
+}
+
+static int32_t CMW_OV05C10_GetAppliedGain(void *io_ctx, int32_t *gain)
+{
+  return OV05C10_GetAppliedGain(&((CMW_OV05C10_t *)io_ctx)->ctx_driver, gain);
+}
+
+static int32_t CMW_OV05C10_GetAppliedExposure(void *io_ctx, int32_t *exposure)
+{
+  return OV05C10_GetAppliedExposure(&((CMW_OV05C10_t *)io_ctx)->ctx_driver, exposure);
 }
 
 /**
@@ -150,7 +160,11 @@ static int32_t CMW_OV05C10_GetSensorInfo(void *io_ctx, ISP_SensorInfoTypeDef *in
     return CMW_ERROR_WRONG_PARAM;
   }
   OV05C10_SensorInfo_t sensor_info;
-  OV05C10_GetSensorInfo(&((CMW_OV05C10_t *)io_ctx)->ctx_driver, &sensor_info);
+  if (OV05C10_GetSensorInfo(&((CMW_OV05C10_t *)io_ctx)->ctx_driver,
+                            &sensor_info) != OV05C10_OK)
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
 
   if (sizeof(info->name) >= strlen(OV05C10_NAME) + 1)
   {
@@ -222,6 +236,11 @@ static int32_t CMW_OV05C10_Start(void *io_ctx)
   }
 #endif
   return OV05C10_Start(&((CMW_OV05C10_t *)io_ctx)->ctx_driver);
+}
+
+static int32_t CMW_OV05C10_Stop(void *io_ctx)
+{
+  return OV05C10_Stop(&((CMW_OV05C10_t *)io_ctx)->ctx_driver);
 }
 
 static int32_t CMW_OV05C10_Run(void *io_ctx)
@@ -309,6 +328,7 @@ int CMW_OV05C10_Probe(CMW_OV05C10_t *io_ctx, CMW_Sensor_if_t *ov05c10_if)
   memset(ov05c10_if, 0, sizeof(*ov05c10_if));
   ov05c10_if->Init = CMW_OV05C10_Init;
   ov05c10_if->Start = CMW_OV05C10_Start;
+  ov05c10_if->Stop = CMW_OV05C10_Stop;
   ov05c10_if->DeInit = CMW_OV05C10_DeInit;
   ov05c10_if->Run = CMW_OV05C10_Run;
   ov05c10_if->VsyncEventCallback = CMW_OV05C10_VsyncEventCallback;
@@ -316,6 +336,8 @@ int CMW_OV05C10_Probe(CMW_OV05C10_t *io_ctx, CMW_Sensor_if_t *ov05c10_if)
   ov05c10_if->ReadID = CMW_OV05C10_ReadID;
   ov05c10_if->SetGain = CMW_OV05C10_SetGain;
   ov05c10_if->SetExposure = CMW_OV05C10_SetExposure;
+  ov05c10_if->GetAppliedGain = CMW_OV05C10_GetAppliedGain;
+  ov05c10_if->GetAppliedExposure = CMW_OV05C10_GetAppliedExposure;
   ov05c10_if->SetWBRefMode = CMW_OV05C10_SetWBRefMode;
   ov05c10_if->ListWBRefModes = CMW_OV05C10_ListWBRefModes;
   ov05c10_if->SetFrequency = CMW_OV05C10_SetFrequency;

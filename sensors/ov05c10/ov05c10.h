@@ -31,7 +31,8 @@ typedef struct
   uint8_t            IsInitialized;
   uint8_t            CurrentPage;
   uint8_t            PageValid;
-  uint64_t 			 Pclk;  // Hz
+  int32_t            AppliedExposure;
+  int32_t            AppliedGain;
 } OV05C10_Object_t;
 
 typedef struct
@@ -109,7 +110,7 @@ typedef struct
 #define OV05C10_ERROR                   (-1)
 
 // resolutions
-#define OV05C10_RESOLUTION_1928_1082	1
+#define OV05C10_RESOLUTION_2888_1808  1U
 
 // formats
 #define OV05C10_RAW_GRBG10 1
@@ -126,6 +127,8 @@ int32_t OV05C10_ReadID(OV05C10_Object_t *pObj, uint32_t *Id);
 int32_t OV05C10_GetCapabilities(OV05C10_Object_t *pObj, OV05C10_Capabilities_t *Capabilities);
 int32_t OV05C10_SetGain(OV05C10_Object_t *pObj, int32_t gain);
 int32_t OV05C10_SetExposure(OV05C10_Object_t *pObj, int32_t exposure);
+int32_t OV05C10_GetAppliedGain(OV05C10_Object_t *pObj, int32_t *gain);
+int32_t OV05C10_GetAppliedExposure(OV05C10_Object_t *pObj, int32_t *exposure);
 int32_t OV05C10_SetFrequency(OV05C10_Object_t *pObj, int32_t frequency);
 int32_t OV05C10_SetFramerate(OV05C10_Object_t *pObj, int32_t framerate);
 int32_t OV05C10_MirrorFlipConfig(OV05C10_Object_t *pObj, OV05C10_MirrorFlip_t Config);

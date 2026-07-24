@@ -59,6 +59,8 @@ typedef struct
   int32_t (*SetFramerate)(void*, int32_t);
   int32_t (*SetGain)(void *, int32_t);
   int32_t (*SetExposure)(void *, int32_t);
+  int32_t (*GetAppliedGain)(void *, int32_t *);
+  int32_t (*GetAppliedExposure)(void *, int32_t *);
   int32_t (*SetExposureMode)(void *, int32_t);
   int32_t (*SetWBRefMode)(void *, uint8_t, uint32_t);
   int32_t (*ListWBRefModes)(void *, uint32_t[]);

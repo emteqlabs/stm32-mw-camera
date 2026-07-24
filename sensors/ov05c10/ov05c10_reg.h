@@ -22,46 +22,32 @@
 #define OV05C10_MODE_STREAMING                0x1F
 
 #define OV05C10_PAGE_ANALOG                   0x01
-#define OV05C10_REG_EXPOSURE                  0x03  // Coarse exposure (MSB) on page 0x01
-#define OV05C10_REG_ANALOG_GAIN               0x24  // Analog gain register on page 0x01
-#define OV05C10_REG_DIGITAL_GAIN              0x00  // Not used in current OVD sequence
+#define OV05C10_REG_EXPOSURE_MSB              0x02
+#define OV05C10_REG_EXPOSURE_MID              0x03
+#define OV05C10_REG_EXPOSURE_LSB              0x04
+#define OV05C10_REG_ANALOG_GAIN               0x24
+#define OV05C10_REG_DIGITAL_GAIN_MSB          0x21
+#define OV05C10_REG_DIGITAL_GAIN_LSB          0x22
+#define OV05C10_REG_ORIENTATION               0x32
 
-#define OV05C10_EXPOSURE_MIN_LINES            (uint16_t)4       // min exposure in lines
-#define OV05C10_EXPOSURE_MIN_VTS              (uint16_t)0x0E88  // min vts from OVD (3720)
-#define OV05C10_EXPOSURE_MAX_LINES_MARGIN     (uint16_t)15      // margin for max exposure
-#define OV05C10_EXPOSURE_MAX_VTS              (uint16_t)0x0E88  // max vts from OVD (3720)
+#define OV05C10_ORIENTATION_MIRROR            0x01U
+#define OV05C10_ORIENTATION_FLIP              0x02U
 
-#define OV05C10_EXPOSURE_MIN                  31       // us, approximate for 4 lines at OVD timing
-#define OV05C10_EXPOSURE_MAX                  14309    // us, approximate for (VTS-margin) at OVD timing
+#define OV05C10_EXPOSURE_MIN_LINES            6U
+#define OV05C10_EXPOSURE_MAX_LINES_MARGIN     33U
 
-#define OV05C10_ANALOG_GAIN_MAX_LINEAR        15.500f  // analog gain linear max value
-#define OV05C10_DIGITAL_GAIN_MAX_LINEAR       15.500f  // digital gain linear max value
-#define OV05C10_ANALOG_GAIN_MAX_DBM           23805  // analog gain dBm max value
-#define OV05C10_DIGITAL_GAIN_MAX_DBM          23805  // digital gain dBm max value
-#define OV05C10_ANALOG_GAIN_MIN_REG           0x0100
-#define OV05C10_ANALOG_GAIN_MAX_REG           0x0F80
-#define OV05C10_DIGITAL_GAIN_MIN_REG          0x010000
-#define OV05C10_DIGITAL_GAIN_MAX_REG          0x0FFFC0
-// analog gain is used up to 23805 dBm, rest is digital
-#define OV05C10_GAIN_MIN                      0      // dBm
-#define OV05C10_GAIN_MAX                      30000  // dBm
+#define OV05C10_ANALOG_GAIN_MAX_LINEAR        15.5f
+#define OV05C10_ANALOG_GAIN_MAX_DBM           23807
+#define OV05C10_ANALOG_GAIN_MIN_REG           0x10U
+#define OV05C10_ANALOG_GAIN_MAX_REG           0xF8U
+#define OV05C10_DIGITAL_GAIN_MIN_REG          0x0040U
+#define OV05C10_DIGITAL_GAIN_MAX_REG          0x0100U
+#define OV05C10_GAIN_MIN                      0
+#define OV05C10_GAIN_MAX                      35848
 
-#define OV05C10_REG_HTS                       0x37  /* page 0x01, read-only */
-#define OV05C10_REG_HTS_MSB                   0x37  /* page 0x01, read-only */
-#define OV05C10_REG_HTS_LSB                   0x38  /* page 0x01, read-only */
 #define OV05C10_REG_VTS_MSB                   0x34  /* page 0x01, read-only */
 #define OV05C10_REG_VTS_MID                   0x35  /* page 0x01, read-only */
 #define OV05C10_REG_VTS_LSB                   0x36  /* page 0x01, read-only */
-#define OV05C10_REG_VBLANK                    0x05  /* page 0x01, write */
-#define OV05C10_REG_VBLANK_MSB                0x05  /* page 0x01, write */
-#define OV05C10_REG_VBLANK_LSB                0x06  /* page 0x01, write */
-#define OV05C10_REG_VBLANK_TRIGGER            0x01  /* page 0x01, write 0x01 */
-
-#define OV05C10_REG_FORMAT                    0x01  /* page 0x01 */
-#define OV05C10_PAGE_ISP_WINDOW               0x07
-#define OV05C1010_REG_ISP_X_WIN_CONTROL       0x00  /* page 0x07 */
-#define OV05C1010_REG_ISP_Y_WIN_CONTROL       0x01  /* page 0x07 */
-
 #define OV05C10_BAYER_PATTERN                 0x01 /* From ISP definition */
 #define OV05C10_COLOR_DEPTH                   10 /* in bits */
 

@@ -730,6 +730,7 @@ int32_t CMW_CAMERA_DisableRestartState()
 int CMW_CAMERA_SetGain(int32_t Gain)
 {
   int ret;
+  int32_t appliedGain = Gain;
   if(Camera_Drv.SetGain == NULL)
   {
     return CMW_ERROR_FEATURE_NOT_SUPPORTED;
@@ -741,7 +742,13 @@ int CMW_CAMERA_SetGain(int32_t Gain)
     return CMW_ERROR_COMPONENT_FAILURE;
   }
 
-  Camera_Ctx.Gain = Gain;
+  if ((Camera_Drv.GetAppliedGain != NULL) &&
+      (Camera_Drv.GetAppliedGain(&camera_bsp, &appliedGain) != CMW_ERROR_NONE))
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
+  Camera_Ctx.Gain = appliedGain;
   return CMW_ERROR_NONE;
 }
 
@@ -764,6 +771,7 @@ int CMW_CAMERA_GetGain(int32_t *Gain)
 int CMW_CAMERA_SetExposure(int32_t exposure)
 {
   int ret;
+  int32_t appliedExposure = exposure;
 
   if(Camera_Drv.SetExposure == NULL)
   {
@@ -776,7 +784,13 @@ int CMW_CAMERA_SetExposure(int32_t exposure)
     return CMW_ERROR_COMPONENT_FAILURE;
   }
 
-  Camera_Ctx.Exposure = exposure;
+  if ((Camera_Drv.GetAppliedExposure != NULL) &&
+      (Camera_Drv.GetAppliedExposure(&camera_bsp, &appliedExposure) != CMW_ERROR_NONE))
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
+  Camera_Ctx.Exposure = appliedExposure;
   return CMW_ERROR_NONE;
 }
 
@@ -2147,8 +2161,8 @@ static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initSensors_params)
   camera_bsp.ov05c10_bsp.Address     = CAMERA_OV05C10_ADDRESS;
   camera_bsp.ov05c10_bsp.Init        = CMW_I2C_INIT;
   camera_bsp.ov05c10_bsp.DeInit      = CMW_I2C_DEINIT;
-  camera_bsp.ov05c10_bsp.ReadReg     = CMW_I2C_READREG;
-  camera_bsp.ov05c10_bsp.WriteReg    = CMW_I2C_WRITEREG;
+  camera_bsp.ov05c10_bsp.ReadReg     = CMW_I2C_READREG8;
+  camera_bsp.ov05c10_bsp.WriteReg    = CMW_I2C_WRITEREG8;
   camera_bsp.ov05c10_bsp.GetTick     = BSP_GetTick;
   camera_bsp.ov05c10_bsp.Delay       = HAL_Delay;
   camera_bsp.ov05c10_bsp.XShutdownPin = CMW_CAMERA_XShutdownPin;
@@ -2173,10 +2187,8 @@ static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initSensors_params)
 
   if ((initSensors_params->width == 0) || (initSensors_params->height == 0))
   {
-    ISP_SensorInfoTypeDef sensor_info;
-    Camera_Drv.GetSensorInfo(&camera_bsp, &sensor_info);
-    initSensors_params->width = sensor_info.width;
-    initSensors_params->height = sensor_info.height;
+    initSensors_params->width = OV05C10_WIDTH;
+    initSensors_params->height = OV05C10_HEIGHT;
   }
 
   CMW_OV05C10_SetDefaultSensorValues(&default_sensor_config);
@@ -2191,12 +2203,6 @@ static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initSensors_params)
 
   switch (sensor_config->pixel_format)
   {
-    case CMW_PIXEL_FORMAT_RAW8:
-    {
-      dt_format = DCMIPP_CSI_DT_BPP8;
-      dt = DCMIPP_DT_RAW8;
-      break;
-    }
     case CMW_PIXEL_FORMAT_RAW10:
     case CMW_PIXEL_FORMAT_DEFAULT:
     {
@@ -2210,7 +2216,7 @@ static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initSensors_params)
 
   csi_conf.NumberOfLanes = DCMIPP_CSI_TWO_DATA_LANES;
   csi_conf.DataLaneMapping = DCMIPP_CSI_PHYSICAL_DATA_LANES;
-  csi_conf.PHYBitrate = DCMIPP_CSI_PHY_BT_800;
+  csi_conf.PHYBitrate = DCMIPP_CSI_PHY_BT_1800;
   ret = HAL_DCMIPP_CSI_SetConfig(&hcamera_dcmipp, &csi_conf);
   if (ret != HAL_OK)
   {
@@ -2543,7 +2549,7 @@ int32_t CMW_CAMERA_SetDefaultSensorValues( CMW_Advanced_Config_t *advanced_confi
 #endif
 #if defined(USE_OV05C10_SENSOR)
   case CMW_OV05C10_Sensor:
-    CMW_OV05C10_SetDefaultSensorValues(&advanced_config->config_sensor.ov02c_config);
+    CMW_OV05C10_SetDefaultSensorValues(&advanced_config->config_sensor.ov05c10_config);
     break;
 #endif
 #if defined(USE_VD65G4_SENSOR)
