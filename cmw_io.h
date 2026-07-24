@@ -33,6 +33,8 @@ extern "C" {
 #define CAMERA_VD65G4_FREQ_IN_HZ       12000000U
 #define CAMERA_IMX335_ADDRESS          0x34U
 #define CAMERA_OV5640_ADDRESS          0x78U
+#define CAMERA_OV05C10_ADDRESS         0x20U
+#define CAMERA_OV05C10_FREQ_IN_HZ      24000000U
 #define CAMERA_VD66GY_ADDRESS          0x20U
 #define CAMERA_VD66GY_FREQ_IN_HZ       12000000U
 #define CAMERA_VD56G3_ADDRESS          0x20U
@@ -79,12 +81,16 @@ extern "C" {
   #define CMW_I2C_DEINIT BSP_I2C2_DeInit
   #define CMW_I2C_READREG16 BSP_I2C2_ReadReg16
   #define CMW_I2C_WRITEREG16 BSP_I2C2_WriteReg16
+  #define CMW_I2C_READREG8 BSP_I2C2_ReadReg
+  #define CMW_I2C_WRITEREG8 BSP_I2C2_WriteReg
 #else
 /* Discovery board */
   #define CMW_I2C_INIT BSP_I2C1_Init
   #define CMW_I2C_DEINIT BSP_I2C1_DeInit
   #define CMW_I2C_READREG16 BSP_I2C1_ReadReg16
   #define CMW_I2C_WRITEREG16 BSP_I2C1_WriteReg16
+  #define CMW_I2C_READREG8 BSP_I2C1_ReadReg
+  #define CMW_I2C_WRITEREG8 BSP_I2C1_WriteReg
 #endif /* STM32N6570_NUCLEO_REV */
 
 #define CSI2_CLK_ENABLE()               __HAL_RCC_CSI_CLK_ENABLE()

@@ -46,6 +46,7 @@ Supported sensors:
 - `ST vd65g4`
 - `ST vd66gy`
 - `ov5640`
+- `ov05c10`
 - `imx335`
 
 **Note**: Some sensors use the STM32 ISP library, while others do not.
@@ -59,6 +60,7 @@ Sensor drivers facilitate communication between the Camera Middleware and the ph
 - ST VD55G1 Camera module
 - ST STEVAL-1943-MC1 Camera module
 - OV5640 Camera module
+- OV05C10 camera module (2888x1808 RAW10, 60 fps)
 
 ## APIs
 

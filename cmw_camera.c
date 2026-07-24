@@ -36,6 +36,9 @@
 #if defined(USE_OV5640_SENSOR)
 #include "cmw_ov5640.h"
 #endif
+#if defined(USE_OV05C10_SENSOR)
+#include "cmw_ov05c10.h"
+#endif
 #if defined(USE_VD66GY_SENSOR)
 #include "cmw_vd66gy.h"
 #endif
@@ -110,6 +113,9 @@ static union
 #if defined(USE_OV5640_SENSOR)
   CMW_OV5640_t ov5640_bsp;
 #endif
+#if defined(USE_OV05C10_SENSOR)
+  CMW_OV05C10_t ov05c10_bsp;
+#endif
 #if defined(USE_VD1943_SENSOR)
   CMW_VD1943_t vd1943_bsp;
 #endif
@@ -133,6 +139,9 @@ static int32_t CMW_CAMERA_VD65G4_Init( CMW_Sensor_Init_t *initSensors_params);
 #endif
 #if defined(USE_OV5640_SENSOR)
 static int32_t CMW_CAMERA_OV5640_Init( CMW_Sensor_Init_t *initSensors_params);
+#endif
+#if defined(USE_OV05C10_SENSOR)
+static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initSensors_params);
 #endif
 #if defined(USE_VD66GY_SENSOR)
 static int32_t CMW_CAMERA_VD66GY_Init(CMW_Sensor_Init_t *initValues);
@@ -271,6 +280,14 @@ static int CMW_CAMERA_Probe_Sensor(CMW_Sensor_Init_t *initValues, CMW_Sensor_Nam
   if (ret == CMW_ERROR_NONE)
   {
     *sensorName = CMW_OV5640_Sensor;
+    return ret;
+  }
+#endif
+#if defined(USE_OV05C10_SENSOR)
+  ret = CMW_CAMERA_OV05C10_Init(initValues);
+  if (ret == CMW_ERROR_NONE)
+  {
+    *sensorName = CMW_OV05C10_Sensor;
     return ret;
   }
 #endif
@@ -714,6 +731,7 @@ int32_t CMW_CAMERA_DisableRestartState()
 int CMW_CAMERA_SetGain(int32_t Gain)
 {
   int ret;
+  int32_t applied_gain;
   if(Camera_Drv.SetGain == NULL)
   {
     return CMW_ERROR_FEATURE_NOT_SUPPORTED;
@@ -725,7 +743,17 @@ int CMW_CAMERA_SetGain(int32_t Gain)
     return CMW_ERROR_COMPONENT_FAILURE;
   }
 
-  Camera_Ctx.Gain = Gain;
+  applied_gain = Gain;
+  if (Camera_Drv.GetAppliedGain != NULL)
+  {
+    ret = Camera_Drv.GetAppliedGain(&camera_bsp, &applied_gain);
+    if (ret != CMW_ERROR_NONE)
+    {
+      return CMW_ERROR_COMPONENT_FAILURE;
+    }
+  }
+
+  Camera_Ctx.Gain = applied_gain;
   return CMW_ERROR_NONE;
 }
 
@@ -748,6 +776,7 @@ int CMW_CAMERA_GetGain(int32_t *Gain)
 int CMW_CAMERA_SetExposure(int32_t exposure)
 {
   int ret;
+  int32_t applied_exposure;
 
   if(Camera_Drv.SetExposure == NULL)
   {
@@ -760,7 +789,17 @@ int CMW_CAMERA_SetExposure(int32_t exposure)
     return CMW_ERROR_COMPONENT_FAILURE;
   }
 
-  Camera_Ctx.Exposure = exposure;
+  applied_exposure = exposure;
+  if (Camera_Drv.GetAppliedExposure != NULL)
+  {
+    ret = Camera_Drv.GetAppliedExposure(&camera_bsp, &applied_exposure);
+    if (ret != CMW_ERROR_NONE)
+    {
+      return CMW_ERROR_COMPONENT_FAILURE;
+    }
+  }
+
+  Camera_Ctx.Exposure = applied_exposure;
   return CMW_ERROR_NONE;
 }
 
@@ -1445,6 +1484,92 @@ static int32_t CMW_CAMERA_OV5640_Init( CMW_Sensor_Init_t *initSensors_params)
   csi_pipe_conf.DataTypeIDA = dt;
   csi_pipe_conf.DataTypeIDB = 0;
   /* Pre-initialize CSI config for all the pipes */
+  for (uint32_t i = DCMIPP_PIPE0; i <= DCMIPP_PIPE2; i++)
+  {
+    ret = HAL_DCMIPP_CSI_PIPE_SetConfig(&hcamera_dcmipp, i, &csi_pipe_conf);
+    if (ret != HAL_OK)
+    {
+      return CMW_ERROR_PERIPH_FAILURE;
+    }
+  }
+
+  return CMW_ERROR_NONE;
+}
+#endif
+
+#if defined(USE_OV05C10_SENSOR)
+static int32_t CMW_CAMERA_OV05C10_Init(CMW_Sensor_Init_t *initSensors_params)
+{
+  int32_t ret;
+  int use_default_mode;
+  DCMIPP_CSI_ConfTypeDef csi_conf = { 0 };
+  DCMIPP_CSI_PIPE_ConfTypeDef csi_pipe_conf = { 0 };
+  CMW_OV05C10_config_t default_sensor_config;
+  CMW_OV05C10_config_t *sensor_config;
+
+  memset(&camera_bsp, 0, sizeof(camera_bsp));
+  camera_bsp.ov05c10_bsp.Address = CAMERA_OV05C10_ADDRESS;
+  camera_bsp.ov05c10_bsp.ClockInHz = CAMERA_OV05C10_FREQ_IN_HZ;
+  camera_bsp.ov05c10_bsp.Init = CMW_I2C_INIT;
+  camera_bsp.ov05c10_bsp.DeInit = CMW_I2C_DEINIT;
+  camera_bsp.ov05c10_bsp.ReadReg = CMW_I2C_READREG8;
+  camera_bsp.ov05c10_bsp.WriteReg = CMW_I2C_WRITEREG8;
+  camera_bsp.ov05c10_bsp.GetTick = BSP_GetTick;
+  camera_bsp.ov05c10_bsp.Delay = HAL_Delay;
+  camera_bsp.ov05c10_bsp.ShutdownPin = CMW_CAMERA_ShutdownPin;
+
+  ret = CMW_OV05C10_Probe(&camera_bsp.ov05c10_bsp, &Camera_Drv);
+  if (ret != CMW_ERROR_NONE)
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+  if ((connected_sensor != CMW_OV05C10_Sensor) && (connected_sensor != CMW_UNKNOWN_Sensor))
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+
+  use_default_mode = ((initSensors_params->width == 0U) || (initSensors_params->height == 0U));
+  if (use_default_mode)
+  {
+    initSensors_params->width = OV05C10_WIDTH;
+    initSensors_params->height = OV05C10_HEIGHT;
+    initSensors_params->fps = OV05C10_FPS;
+  }
+
+  CMW_OV05C10_SetDefaultSensorValues(&default_sensor_config);
+  initSensors_params->sensor_config = (initSensors_params->sensor_config != NULL) ?
+                                     initSensors_params->sensor_config : &default_sensor_config;
+  sensor_config = (CMW_OV05C10_config_t *)initSensors_params->sensor_config;
+
+  ret = Camera_Drv.Init(&camera_bsp, initSensors_params);
+  if (ret != CMW_ERROR_NONE)
+  {
+    return CMW_ERROR_COMPONENT_FAILURE;
+  }
+  if ((sensor_config->pixel_format != CMW_PIXEL_FORMAT_DEFAULT) &&
+      (sensor_config->pixel_format != CMW_PIXEL_FORMAT_RAW10))
+  {
+    return CMW_ERROR_WRONG_PARAM;
+  }
+
+  csi_conf.NumberOfLanes = DCMIPP_CSI_TWO_DATA_LANES;
+  csi_conf.DataLaneMapping = DCMIPP_CSI_PHYSICAL_DATA_LANES;
+  csi_conf.PHYBitrate = DCMIPP_CSI_PHY_BT_1800;
+  ret = HAL_DCMIPP_CSI_SetConfig(&hcamera_dcmipp, &csi_conf);
+  if (ret != HAL_OK)
+  {
+    return CMW_ERROR_PERIPH_FAILURE;
+  }
+
+  ret = HAL_DCMIPP_CSI_SetVCConfig(&hcamera_dcmipp, DCMIPP_VIRTUAL_CHANNEL0, DCMIPP_CSI_DT_BPP10);
+  if (ret != HAL_OK)
+  {
+    return CMW_ERROR_PERIPH_FAILURE;
+  }
+
+  csi_pipe_conf.DataTypeMode = DCMIPP_DTMODE_DTIDA;
+  csi_pipe_conf.DataTypeIDA = DCMIPP_DT_RAW10;
+  csi_pipe_conf.DataTypeIDB = 0U;
   for (uint32_t i = DCMIPP_PIPE0; i <= DCMIPP_PIPE2; i++)
   {
     ret = HAL_DCMIPP_CSI_PIPE_SetConfig(&hcamera_dcmipp, i, &csi_pipe_conf);
@@ -2444,6 +2569,11 @@ int32_t CMW_CAMERA_SetDefaultSensorValues( CMW_Advanced_Config_t *advanced_confi
 #if defined(USE_OV5640_SENSOR)
   case CMW_OV5640_Sensor:
     CMW_OV5640_SetDefaultSensorValues(&advanced_config->config_sensor.ov5640_config);
+    break;
+#endif
+#if defined(USE_OV05C10_SENSOR)
+  case CMW_OV05C10_Sensor:
+    CMW_OV05C10_SetDefaultSensorValues(&advanced_config->config_sensor.ov05c10_config);
     break;
 #endif
 #if defined(USE_VD1943_SENSOR)
